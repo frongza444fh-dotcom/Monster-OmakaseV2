@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Monster Omakase - Universal Breakout Edition</title>
+    <title>Monster Omakase - Universal Master Edition</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Mali:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Mali:wght=400;700&display=swap');
 
-        /* 🎀 บังคับใช้ฟอนต์น่ารัก 'Mali' ทุกจุดทั่วทั้งเกม */
-        body, input, button, table, th, td, div, h1, h2, h3, p, span { 
+        /* 🎀 บังคับใช้ฟอนต์น่ารัก 'Mali' ทุกจุดทั่วทั้งเกม ป้องกันฟอนต์ระบบแตก */
+        body, input, button, table, th, td, div, h1, h2, h3, p, span, a { 
             font-family: 'Mali', sans-serif !important; 
         }
 
@@ -31,12 +31,12 @@
         .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; justify-content: center; align-items: center; background-size: cover; background-position: center; background-repeat: no-repeat; }
         .active { display: flex; }
 
-        /* 🔒 หน้าต่างพิเศษ ดักจับกรณีเปิดผ่านปุ่ม ดูออนไลน์ ของ OBEC */
+        /* 🔒 หน้าต่างดักจับและทะลุกรอบบล็อก OBEC (Triple-Fallback) สำหรับ iPad / มือถือ */
         #iframe-redirect-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(44, 62, 80, 0.98); z-index: 99999;
             display: none; flex-direction: column; justify-content: center; align-items: center;
-            padding: 4vmin; text-align: center; box-sizing: border-box;
+            padding: 3vmin; text-align: center; box-sizing: border-box;
         }
 
         /* --- บังคับแนวนอน --- */
@@ -119,7 +119,7 @@
         td { padding: 1.2vmin; border-bottom: 0.2vmin solid #ddd; text-align: center; font-weight: bold; }
         tr:nth-child(even) { background-color: #fbf0f3; }
         
-        .how-to-box { background: white; padding: 4vmin; border-radius: 4vmin; width: 80%; text-align: left; border: 1vmin solid #ff9ff3; box-shadow: 0 2vmin 3vmin rgba(0,0,0,0.1); font-size: 2.5vmin; box-sizing: border-box; }
+        .how-to-box { background: white; padding: 3vmin 4vmin; border-radius: 4vmin; width: 85%; text-align: left; border: 1vmin solid #ff9ff3; box-shadow: 0 2vmin 3vmin rgba(0,0,0,0.1); font-size: 2.3vmin; box-sizing: border-box; }
         input[type=range] { width: 100%; accent-color: #ff6b81; }
 
         .emoji-btn-group { display: flex; justify-content: center; gap: 6vmin; margin: 4vmin 0; }
@@ -147,13 +147,22 @@
 
 <div id="game-container">
     <div id="iframe-redirect-screen">
-        <div class="how-to-box" style="text-align: center; width: 85%; border: 1vmin solid #2ed573;">
-            <h1 style="color: #2ed573; font-size: 5vmin; margin: 0; font-weight: bold;">🎮 ตรวจพบการเล่นผ่านคลังสื่อ OBEC</h1>
-            <p style="font-size: 2.8vmin; color: #333; margin: 3vmin 0; line-height: 1.5; font-weight: bold;">
-                เพื่อให้ระบบ **ไมค์ AI (ออกเสียงศัพท์)** และ **เสียงดนตรีเกม** ทำงานได้เสถียร 100% บน iPad และมือถือ<br>
-                กรุณากดปุ่มสีเขียวด้านล่างเพื่อเปิดหน้าต่างเล่นเกมแบบเต็มจอนะครับ!
+        <div class="how-to-box" style="text-align: center; width: 90%; border: 1vmin solid #2ed573; max-height: 90vh; overflow-y: auto;">
+            <h2 style="color: #2ed573; font-size: 4.5vmin; margin: 0; font-weight: bold;">🎮 ตรวจพบการเล่นผ่านกรอบล็อก OBEC</h2>
+            <p style="font-size: 2.5vmin; color: #333; margin: 2vmin 0; line-height: 1.5; font-weight: bold;">
+                เนื่องจากระบบความปลอดภัยของ Apple และเบราว์เซอร์มือถือ จะบล็อกไม่ให้เว็บไซต์ในกรอบเข้าถึงไมโครโฟน<br>
+                คุณครูและนักเรียนสามารถทะลุกรอบบล็อกเพื่อเปิดระบบ **ไมค์ AI** และ **เสียงเกม** ได้ 100% ด้วยวิธีด้านล่างนี้ครับ:
             </p>
-            <button class="btn" style="background-color: #2ed573; box-shadow: 0 0.8vmin 0 #27ae60; font-size: 4vmin; padding: 2.5vmin 6vmin;" onclick="breakoutToNewTab()">🚀 เปิดเล่นเกมเต็มจอ</button>
+            
+            <div style="display: flex; justify-content: center; gap: 2vmin; flex-wrap: wrap; margin-bottom: 2.5vmin;">
+                <a id="breakout-link" href="#" target="_blank" rel="noopener noreferrer" class="btn" style="background-color: #2ed573; box-shadow: 0 0.8vmin 0 #27ae60; font-size: 3vmin; padding: 2vmin 4vmin; text-decoration: none; display: inline-block;">🚀 วิธีที่ 1: กดเปิดเกมเต็มจอ</a>
+                
+                <button class="btn" style="background-color: #54a0ff; box-shadow: 0 0.8vmin 0 #2e86de; font-size: 3vmin; padding: 2vmin 4vmin;" onclick="copyGameUrl()">📋 วิธีที่ 2: คัดลอกลิงก์ตรง</button>
+            </div>
+
+            <div style="background: #f5f6fa; border: 0.3vmin dashed #ccc; padding: 1.5vmin; border-radius: 2vmin; font-size: 2.2vmin; word-break: break-all; font-weight: bold; color: #555;">
+                🔗 ลิงก์ตรงสำหรับเปิดบน Safari: <span id="url-text-display" style="color:#2980b9; user-select: all;">ดึงข้อมูลลิงก์...</span>
+            </div>
         </div>
     </div>
 
@@ -389,7 +398,15 @@
     let speechVolume = savedSpeech !== null ? parseFloat(savedSpeech) : 1.0;
 
     window.addEventListener('load', () => {
-        // 🔒 ระบบตรวจสอบ: ถ้าเจอว่าตัวเองโดนฝังอยู่ใน Iframe ของ OBEC บังคับกางหน้ากาก Breakout ทันที
+        // 🔒 ดักจับความปลอดภัยระดับสากล: ตรวจสอบพิกัดตัวกรอบ Iframe
+        const currentUrl = window.location.href;
+        
+        // ผูกลิงก์ตรงเข้ากับองค์ประกอบ HTML แบบถาวร ทะลุกรอบบล็อก Iframe
+        const breakoutLink = document.getElementById('breakout-link');
+        if (breakoutLink) breakoutLink.href = currentUrl;
+        document.getElementById('url-text-display').innerText = currentUrl;
+
+        // เปิดหน้าจอดักจับทันทีหากรันอยู่ในกรอบของคลังสื่อ OBEC
         if (window.self !== window.top) {
             document.getElementById('iframe-redirect-screen').style.display = 'flex';
         }
@@ -419,9 +436,20 @@
         }
     });
 
-    // 🚀 ฟังก์ชันสั่งให้สคริปต์สลัดหลุดจากกรอบบล็อกของ OBEC แล้วไปเปิดที่เบราว์เซอร์แท้ของเครื่อง
-    function breakoutToNewTab() {
-        window.open(window.location.href, '_blank');
+    // 📋 ฟังก์ชันก๊อบปี้ลิงก์ตรงอัตโนมัติ (Fallback ป้องกันเบราว์เซอร์บล็อกสคริปต์)
+    function copyGameUrl() {
+        const url = window.location.href;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(url).then(() => alert('📋 คัดลอกลิงก์ตรงสำเร็จแล้ว! นำไปวางในแอป Safari หรือ Chrome ได้เลยครับ'));
+        } else {
+            const input = document.createElement('input');
+            input.value = url;
+            document.body.appendChild(input);
+            input.select();
+            document.execCommand('copy');
+            document.body.removeChild(input);
+            alert('📋 คัดลอกลิงก์ตรงสำเร็จแล้ว! นำไปวางในแอป Safari หรือ Chrome ได้เลยครับ');
+        }
     }
 
     function openSettings() { document.getElementById('settings-modal').style.display = 'flex'; }
