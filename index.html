@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Monster Omakase - Research & Evaluation Edition</title>
+    <title>Monster Omakase - Universal Research Edition</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Mali:wght@400;700&display=swap');
 
-        /* 🎀 บังคับใช้ฟอนต์น่ารัก 'Mali' เหมือนกันหมดทุกจุดทั่วทั้งเกม */
+        /* 🎀 บังคับใช้ฟอนต์น่ารัก 'Mali' ทั่วทั้งเกมป้องกันฟอนต์ระบบแตก */
         body, input, button, table, th, td, div, h1, h2, h3, p, span { 
             font-family: 'Mali', sans-serif !important; 
         }
@@ -25,7 +25,7 @@
         .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; justify-content: center; align-items: center; background-size: cover; background-position: center; background-repeat: no-repeat; }
         .active { display: flex; }
 
-        /* --- บังคับแนวนอน --- */
+        /* --- บังคับแนวนอนสไตล์เกมมือถือ --- */
         #orientation-warning { display: none; background: #ee5253; color: white; text-align: center; padding: 20px; z-index: 9999; }
         @media screen and (orientation: portrait) {
             #game-container { display: none !important; }
@@ -44,10 +44,7 @@
         #characters-screen { background-image: url('monster characters.png'); background-size: contain; background-color: #fad390; }
         #test-type-screen { background-image: url('หน้าแรก.png'); background-color: rgba(255, 255, 255, 0.85); background-blend-mode: overlay; }
         #mode-screen { background-image: url('หน้าแรก.png'); background-color: rgba(255, 255, 255, 0.85); background-blend-mode: overlay; }
-        
-        /* 🎬 ปรับโหมดด่านบอสให้เคลียร์ภาพนิ่งออก เพื่อรองรับ Tag Video คลื่นไหวหลังบ้าน */
         #boss-screen { justify-content: flex-end; padding-bottom: 5vmin; position: relative; }
-        
         #result-screen { background-image: url('leader board.png'); justify-content: center; }
         #satisfaction-screen { background-image: url('leader board.png'); justify-content: center; }
         #leaderboard-screen { background-image: url('leader board.png'); justify-content: flex-start; padding-top: 5vmin; }
@@ -79,9 +76,9 @@
         .mouth-zone { position: absolute; border-radius: 50%; z-index: 10; border: 0.6vmin dashed rgba(255, 255, 255, 0.7); background: rgba(255, 255, 255, 0.2); box-shadow: 0 0 2vmin rgba(255, 255, 255, 0.3); }
         .conveyor-belt { position: absolute; bottom: 0; width: 100%; height: 18vmin; z-index: 15; pointer-events: none; }
         
-        .sushi-wrapper { position: absolute; bottom: 5vmin; display: flex; flex-direction: column; align-items: center; cursor: grab; filter: drop-shadow(0 1.5vmin 1.5vmin rgba(0,0,0,0.4)); user-select: none; z-index: 150; touch-action: none; transition: transform 0.1s; }
+        .sushi-wrapper { position: absolute; bottom: 5vmin; display: flex; flex-direction: column; align-items: center; cursor: grab; filter: drop-shadow(0 1.5vmin 1.5vmin rgba(0,0,0,0.4)); user-select: none; z-index: 150; touch-action: none; width: 16vmin; }
         .sushi-topping { width: 115%; height: 6vmin; border-radius: 4vmin 4vmin 1.5vmin 1.5vmin; margin-bottom: -2vmin; z-index: 2; border: 0.4vmin solid rgba(0,0,0,0.1); border-bottom: none; }
-        .sushi-rice { background: #fff; border: 0.6vmin solid #ccc; padding: 1.5vmin 4vmin; border-radius: 2vmin 2vmin 4vmin 4vmin; font-size: 4.5vmin; font-weight: bold; color: #333; z-index: 1; text-align: center; box-shadow: inset -0.8vmin -0.8vmin 1.5vmin rgba(0,0,0,0.08); }
+        .sushi-rice { background: #fff; border: 0.6vmin solid #ccc; padding: 1.5vmin 0; width: 100%; border-radius: 2vmin 2vmin 4vmin 4vmin; font-size: 3vmin; font-weight: bold; color: #333; z-index: 1; text-align: center; box-shadow: inset -0.8vmin -0.8vmin 1.5vmin rgba(0,0,0,0.08); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         .topping-1 { background: repeating-linear-gradient(45deg, #ff7f50, #ff7f50 2.5vmin, #ff9f7a 2.5vmin, #ff9f7a 5vmin); }
         .topping-2 { background: #e74c3c; }
@@ -103,7 +100,7 @@
         .how-to-box { background: white; padding: 4vmin; border-radius: 4vmin; width: 80%; text-align: left; border: 1vmin solid #ff9ff3; box-shadow: 0 2vmin 3vmin rgba(0,0,0,0.1); font-size: 2.5vmin; }
         input[type=range] { width: 100%; accent-color: #ff6b81; }
 
-        /* --- 📊 สไตล์ระบบกราฟความพึงพอใจดิจิทัล --- */
+        /* --- ระบบพล็อตสถิติกราฟดิจิทัล --- */
         .emoji-btn-group { display: flex; justify-content: center; gap: 6vmin; margin: 4vmin 0; }
         .emoji-select-btn { font-size: 9vmin; background: white; border: 0.5vmin solid #ff9ff3; border-radius: 4vmin; padding: 2vmin 4vmin; cursor: pointer; box-shadow: 0 1vmin 0 #f368e0; transition: all 0.1s; }
         .emoji-select-btn:active { transform: translateY(0.8vmin); box-shadow: 0 0.2vmin 0 #f368e0; }
@@ -120,11 +117,12 @@
 <body>
 
 <div id="orientation-warning">
-    <h1 style="font-size: 4vmin; font-weight: bold;">Please Rotate Your Device</h1>
-    <p style="font-size: 2.5vmin;">กรุณาหมุนโทรศัพท์เป็นแนวนอนเพื่อเล่นเกมนะครับ!</p>
+    <div class="rotate-icon">📱➡️📟</div>
+    <h1 style="font-size: 4vmin; font-weight: bold; margin: 0;">Please Rotate Your Device</h1>
+    <p style="font-size: 2.5vmin; margin-top: 1vmin;">กรุณาหมุนโทรศัพท์เป็นแนวนอนเพื่อเล่นเกมนะครับ!</p>
 </div>
 
-<audio id="bg-music" src="bg-music.mp3" loop preload="auto" autoplay></audio>
+<audio id="bg-music" src="bg-music.mp3" loop preload="auto"></audio>
 
 <div id="game-container">
     <div id="home-screen" class="screen active">
@@ -317,14 +315,15 @@
 </div>
 
 <script>
+    // 📊 คลังคำศัพท์เวอร์ชันอัปเดต 10 คำตรงเล่มแผนการจัดการเรียนรู้เป้าหมาย 100%
     const modesConfig = {
-        1: { bg: "url('โหมดที่ 1.png')", vocab: [{word:"Red",cat:"color"}, {word:"Blue",cat:"color"}, {word:"Green",cat:"color"}, {word:"Yellow",cat:"color"}, {word:"Pink",cat:"color"}, {word:"Black",cat:"color"}, {word:"White",cat:"color"}, {word:"Orange",cat:"color"}, {word:"Purple",cat:"color"}, {word:"Brown",cat:"color"}, {word:"Circle",cat:"shape"}, {word:"Square",cat:"shape"}, {word:"Triangle",cat:"shape"}, {word:"Star",cat:"shape"}, {word:"Heart",cat:"shape"}, {word:"Oval",cat:"shape"}, {word:"Diamond",cat:"shape"}, {word:"Cross",cat:"shape"}, {word:"Arrow",cat:"shape"}, {word:"Line",cat:"shape"}], leftMouth:{cat:"shape",l:"28%",t:"32%",w:"22%",h:"25%"}, rightMouth:{cat:"color",l:"70%",t:"43%",w:"16%",h:"18%"} },
-        2: { bg: "url('โหมดที่ 2.png')", vocab: [{word:"Dog",cat:"pet"}, {word:"Cat",cat:"pet"}, {word:"Fish",cat:"pet"}, {word:"Bird",cat:"pet"}, {word:"Rabbit",cat:"pet"}, {word:"Hamster",cat:"pet"}, {word:"Turtle",cat:"pet"}, {word:"Mouse",cat:"pet"}, {word:"Parrot",cat:"pet"}, {word:"Puppy",cat:"pet"}, {word:"Lion",cat:"wild"}, {word:"Tiger",cat:"wild"}, {word:"Elephant",cat:"wild"}, {word:"Monkey",cat:"wild"}, {word:"Bear",cat:"wild"}, {word:"Snake",cat:"wild"}, {word:"Zebra",cat:"wild"}, {word:"Giraffe",cat:"wild"}, {word:"Hippo",cat:"wild"}, {word:"Fox",cat:"wild"}], leftMouth:{cat:"wild",l:"32%",t:"38%",w:"15%",h:"20%"}, rightMouth:{cat:"pet",l:"69%",t:"35%",w:"12%",h:"16%"} },
-        3: { bg: "url('โหมดที่ 3.png')", vocab: [{word:"Head",cat:"body"}, {word:"Eye",cat:"body"}, {word:"Ear",cat:"body"}, {word:"Nose",cat:"body"}, {word:"Mouth",cat:"body"}, {word:"Arm",cat:"body"}, {word:"Hand",cat:"body"}, {word:"Leg",cat:"body"}, {word:"Foot",cat:"body"}, {word:"Hair",cat:"body"}, {word:"Pen",cat:"school"}, {word:"Pencil",cat:"school"}, {word:"Book",cat:"school"}, {word:"Ruler",cat:"school"}, {word:"Eraser",cat:"school"}, {word:"Desk",cat:"school"}, {word:"Chair",cat:"school"}, {word:"Bag",cat:"school"}, {word:"Paper",cat:"school"}, {word:"Board",cat:"school"}], leftMouth:{cat:"body",l:"29%",t:"42%",w:"15%",h:"22%"}, rightMouth:{cat:"school",l:"62%",t:"38%",w:"12%",h:"20%"} }
+        1: { bg: "url('โหมดที่ 1.png')", vocab: [{word:"Red",cat:"color"}, {word:"Blue",cat:"color"}, {word:"Green",cat:"color"}, {word:"Yellow",cat:"color"}, {word:"Pink",cat:"color"}, {word:"Black",cat:"color"}, {word:"White",cat:"color"}, {word:"Orange",cat:"color"}, {word:"Purple",cat:"color"}, {word:"Brown",cat:"color"}, {word:"Circle",cat:"shape"}, {word:"Square",cat:"shape"}, {word:"Triangle",cat:"shape"}, {word:"Star",cat:"shape"}, {word:"Heart",cat:"shape"}, {word:"Oval",cat:"shape"}, {word:"Rectangle",cat:"shape"}, {word:"Diamond",cat:"shape"}, {word:"Cross",cat:"shape"}, {word:"Crescent",cat:"shape"}], leftMouth:{cat:"shape",l:"28%",t:"32%",w:"22%",h:"25%"}, rightMouth:{cat:"color",l:"70%",t:"43%",w:"16%",h:"18%"} },
+        2: { bg: "url('โหมดที่ 2.png')", vocab: [{word:"Dog",cat:"pet"}, {word:"Cat",cat:"pet"}, {word:"Fish",cat:"pet"}, {word:"Bird",cat:"pet"}, {word:"Rabbit",cat:"pet"}, {word:"Hamster",cat:"pet"}, {word:"Turtle",cat:"pet"}, {word:"Mouse",cat:"pet"}, {word:"Parrot",cat:"pet"}, {word:"Duck",cat:"pet"}, {word:"Lion",cat:"wild"}, {word:"Tiger",cat:"wild"}, {word:"Elephant",cat:"wild"}, {word:"Monkey",cat:"wild"}, {word:"Bear",cat:"wild"}, {word:"Snake",cat:"wild"}, {word:"Zebra",cat:"wild"}, {word:"Giraffe",cat:"wild"}, {word:"Hippo",cat:"wild"}, {word:"Fox",cat:"wild"}], leftMouth:{cat:"wild",l:"32%",t:"38%",w:"15%",h:"20%"}, rightMouth:{cat:"pet",l:"69%",t:"35%",w:"12%",h:"16%"} },
+        3: { bg: "url('โหมดที่ 3.png')", vocab: [{word:"Head",cat:"body"}, {word:"Eye",cat:"body"}, {word:"Ear",cat:"body"}, {word:"Nose",cat:"body"}, {word:"Mouth",cat:"body"}, {word:"Arm",cat:"body"}, {word:"Hand",cat:"body"}, {word:"Leg",cat:"body"}, {word:"Foot",cat:"body"}, {word:"Hair",cat:"body"}, {word:"Pen",cat:"school"}, {word:"Pencil",cat:"school"}, {word:"Book",cat:"school"}, {word:"Ruler",cat:"school"}, {word:"Eraser",cat:"school"}, {word:"Desk",cat:"school"}, {word:"Chair",cat:"school"}, {word:"Bag",cat:"school"}, {word:"Sharpener",cat:"school"}, {word:"Pencil case",cat:"school"}], leftMouth:{cat:"body",l:"29%",t:"42%",w:"15%",h:"22%"}, rightMouth:{cat:"school",l:"62%",t:"38%",w:"12%",h:"20%"} }
     };
 
     const fuzzyDict = { 
-        "red":["red","เรด"], "blue":["blue","บลู"], "green":["green","กรีน"], "yellow":["yellow","เยลโล่"], "pink":["pink","พิงค์"], "black":["black","แบล็ค"], "white":["white","ไวท์"], "orange":["orange","ออเรนจ์"], "purple":["purple","เพоเพิล"], "brown":["brown","บราวน์"], "circle":["circle","เซอเคิล"], "square":["square","สแควร์"], "triangle":["triangle","ไทรแองเกิล"], "star":["star","สตาร์"], "heart":["heart","ฮาร์ท"], "oval":["oval","โอวอล"], "diamond":["diamond","ไดมอนด์"], "cross":["cross","ครอส"], "arrow":["arrow","แอร์โรว์"], "line":["line","ไลน์"], "dog":["dog","ด็อก"], "cat":["cat","แคท"], "fish":["fish","ฟิช"], "bird":["bird","เบิร์ด"], "rabbit":["rabbit","แรบบิท"], "hamster":["hamster","แฮมสเตอร์"], "turtle":["turtle","เทอเทิล"], "mouse":["mouse","เมาส์"], "parrot":["parrot","แพรรอต"], "puppy":["puppy","พัพพี่"], "lion":["lion","ไลออน"], "tiger":["tiger","ไทเกอร์"], "elephant":["elephant","เอเลเฟนท์"], "monkey":["monkey","มังกี้"], "bear":["bear","แบร์"], "snake":["snake","สเน็ค"], "zebra":["zebra","ซีบร้า"], "giraffe":["giraffe","จีราฟ"], "hippo":["hippo","ฮิปโป"], "fox":["fox","ฟ็อกซ์"], "head":["head","เฮด"], "eye":["eye","อาย"], "ear":["ear","เอียร์"], "nose":["nose","โนส"], "mouth":["mouth","เมาท์"], "arm":["arm","อาร์ม"], "hand":["hand","แฮนด์"], "leg":["leg","เลก"], "foot":["foot","ฟุต"], "hair":["hair","แฮร์"], "pen":["pen","เพน"], "pencil":["pencil","เพนซิล"], "book":["book","บุ๊ค"], "ruler":["ruler","รูเลอร์"], "eraser":["eraser","อีเรเซอร์"], "desk":["desk","เดสก์"], "chair":["chair","แชร์"], "bag":["bag","แบ็ก"], "paper":["paper","เพเพอร์"], "board":["board","บอร์ด"]
+        "red":["red","เรด"], "blue":["blue","บลู"], "green":["green","กรีน"], "yellow":["yellow","เยลโล่"], "pink":["pink","พิงค์"], "black":["black","แบล็ค"], "white":["white","ไวท์"], "orange":["orange","ออเรนจ์"], "purple":["purple","เพอร์เพิล"], "brown":["brown","บราวน์"], "circle":["circle","เซอเคิล"], "square":["square","สแควร์"], "triangle":["triangle","ไทรแองเกิล"], "star":["star","สตาร์"], "heart":["heart","ฮาร์ท"], "oval":["oval","โอวอล"], "diamond":["diamond","ไดมอนด์"], "cross":["cross","ครอส"], "rectangle":["rectangle","แรคแทนเกิล"], "crescent":["crescent","เครสเซนต์"], "dog":["dog","ด็อก"], "cat":["cat","แคท"], "fish":["fish","ฟิช"], "bird":["bird","เบิร์ด"], "rabbit":["rabbit","แรบบิท"], "hamster":["hamster","แฮมสเตอร์"], "turtle":["turtle","เทอเทิล"], "mouse":["mouse","เมาส์"], "parrot":["parrot","แพรรอต"], "duck":["duck","ดัค"], "lion":["lion","ไลออน"], "tiger":["tiger","ไทเกอร์"], "elephant":["elephant","เอเลเฟนท์"], "monkey":["monkey","มังกี้"], "bear":["bear","แบร์"], "snake":["snake","สเน็ค"], "zebra":["zebra","ซีบร้า"], "giraffe":["giraffe","จีราฟ"], "hippo":["hippo","ฮิปโป"], "fox":["fox","ฟ็อกซ์"], "head":["head","เฮด"], "eye":["eye","อาย"], "ear":["ear","เอียร์"], "nose":["nose","โนส"], "mouth":["mouth","เมาท์"], "arm":["arm","อาร์ม"], "hand":["hand","แฮนด์"], "leg":["leg","เลก"], "foot":["foot","ฟุต"], "hair":["hair","แฮร์"], "pen":["pen","เพน"], "pencil":["pencil","เพนซิล"], "book":["book","บุ๊ค"], "ruler":["ruler","รูเลอร์"], "eraser":["eraser","อีเรเซอร์"], "desk":["desk","เดสก์"], "chair":["chair","แชร์"], "bag":["bag","แบ็ก"], "sharpener":["sharpener","ชาร์ปเพนเนอร์"], "pencil case":["pencil case","เพนซิลเคส"]
     };
 
     const researchStudents = [
@@ -344,10 +343,7 @@
         { name: "เด็กชาย ธนภัทร พวงแก้ว", pre: 28, post: 73, stars: "⭐⭐" }
     ];
 
-    let baseGood = 34;
-    let baseNeutral = 1;
-    let baseBad = 0;
-
+    let baseGood = 34, baseNeutral = 1, baseBad = 0;
     let scoreE1 = 0, scoreE2 = 0, totalScore = 0, timeLeft = 30;
     let gameInterval, spawnInterval, bossInterval, currentMode, vocabPool = [];
     let currentBossWord = "", isMicActive = false, isBossStageActive = false, isProcessing = false;
@@ -367,19 +363,23 @@
         document.getElementById('speech-slider').value = Math.round(speechVolume * 100);
         document.getElementById('speech-val').innerText = Math.round(speechVolume * 100) + '%';
         
-        const music = document.getElementById('bg-music');
-        if(music) {
-            music.volume = bgmVolume;
-            music.play().catch(e => {
-                const forcePlay = () => {
-                    music.play().catch(err => console.log(err));
-                    document.removeEventListener('click', forcePlay);
-                    document.removeEventListener('touchstart', forcePlay);
-                };
-                document.addEventListener('click', forcePlay);
-                document.addEventListener('touchstart', forcePlay);
-            });
-        }
+        // 🔒 ปลดล็อกมาตรการความปลอดภัย iOS Audio Context / Autoplay (ใช้ได้ทุกเครื่อง)
+        const unlockAudio = () => {
+            // ปลดล็อกเสียงอ่านศัพท์ล่วงหน้า
+            let dummyUtterance = new SpeechSynthesisUtterance("");
+            window.speechSynthesis.speak(dummyUtterance);
+
+            // ปลดล็อกดนตรีพื้นหลัง
+            const music = document.getElementById('bg-music');
+            if (music) {
+                music.volume = bgmVolume;
+                music.play().catch(e => console.log("Audio contextual unlock failed"));
+            }
+            document.removeEventListener('click', unlockAudio);
+            document.removeEventListener('touchstart', unlockAudio);
+        };
+        document.addEventListener('click', unlockAudio);
+        document.addEventListener('touchstart', unlockAudio);
 
         if (!localStorage.getItem('monsterScores')) {
             localStorage.setItem('monsterScores', JSON.stringify(researchStudents));
@@ -425,18 +425,19 @@
         if (!nativeVoice) loadNativeVoice();
         if (nativeVoice) msg.voice = nativeVoice;
         msg.lang = 'en-US'; 
-        msg.rate = 0.9;
+        msg.rate = 0.85; // ปรับความเร็วลดลงเพื่อให้นักเรียน ป.1 ฟังง่ายขึ้นชัดเจนขึ้น
         msg.volume = speechVolume; 
         window.speechSynthesis.speak(msg);
     }
 
+    // 🎙️ รองรับสถาปัตยกรรมไมโครโฟนทั้งดั้งเดิมและ Webkit สำหรับ iOS/Safari
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition;
     if (SpeechRecognition) {
         recognition = new SpeechRecognition();
         recognition.lang = 'en-US';
         recognition.interimResults = true; 
-        recognition.continuous = true;
+        recognition.continuous = false; // ปิดเพื่อให้ระบบตัดคำเสถียรที่สุดบนหน้าจอสัมผัส Safari และอุปกรณ์โมบายล์
     }
 
     function showScreen(id) {
@@ -476,15 +477,15 @@
             "Red": "🔴", "Blue": "🔵", "Green": "🟢", "Yellow": "🟡", "Pink": "🩷",
             "Black": "⚫", "White": "⚪", "Orange": "🟠", "Purple": "🟣", "Brown": "🟤",
             "Circle": "⭕", "Square": "⬛", "Triangle": "🔺", "Star": "⭐", "Heart": "❤️",
-            "Oval": "🥚", "Diamond": "💎", "Cross": "✖️", "Arrow": "➡️", "Line": "➖",
+            "Oval": "🥚", "Diamond": "💎", "Cross": "✖️", "Rectangle": "🟩", "Crescent": "🌙",
             "Dog": "🐶", "Cat": "🐱", "Fish": "🐟", "Bird": "🐦", "Rabbit": "🐰",
-            "Hamster": "🐹", "Turtle": "🐢", "Mouse": "🐭", "Parrot": "🦜", "Puppy": "🐕",
+            "Hamster": "🐹", "Turtle": "🐢", "Mouse": "🐭", "Parrot": "🦜", "Duck": "🦆",
             "Lion": "🦁", "Tiger": "🐯", "Elephant": "🐘", "Monkey": "🐵", "Bear": "🐻",
             "Snake": "🐍", "Zebra": "🦓", "Giraffe": "🦒", "Hippo": "🦛", "Fox": "🦊",
             "Head": "👤", "Eye": "👁️", "Ear": "👂", "Nose": "👃", "Mouth": "👄",
             "Arm": "💪", "Hand": "✋", "Leg": "🦵", "Foot": "🦶", "Hair": "💇",
             "Pen": "🖊️", "Pencil": "✏️", "Book": "📖", "Ruler": "📏", "Eraser": "🧼",
-            "Desk": "🟫", "Chair": "🪑", "Bag": "🎒", "Paper": "📄", "Board": "📋"
+            "Desk": "🟫", "Chair": "🪑", "Bag": "🎒", "Sharpener": "⚙️", "Pencil case": "👝"
         };
 
         targetConfig.vocab.forEach(item => {
@@ -548,33 +549,67 @@
         speak(item.word);
 
         let isDragging = false;
-        const handleStart = (e) => { isDragging = true; wrapper.style.zIndex = 1000; wrapper.style.transform = 'scale(1.1)'; };
+        const container = document.getElementById('game-container');
+
+        const handleStart = (e) => { 
+            isDragging = true; 
+            wrapper.style.zIndex = 1000; 
+            wrapper.style.transform = 'scale(1.1)'; 
+        };
+
         const handleMove = (e) => {
             if (!isDragging) return; 
             e.preventDefault(); 
             let touch = e.touches ? e.touches[0] : e;
-            wrapper.style.position = 'fixed';
-            wrapper.style.left = (touch.clientX - wrapper.offsetWidth / 2) + 'px';
-            wrapper.style.top = (touch.clientY - wrapper.offsetHeight / 2) + 'px';
+            
+            let containerRect = container.getBoundingClientRect();
+            
+            // 🛠️ ระบบพิกัด Relative สัดส่วนทองคำเทียบขอบ Container หลัก ป้องกันพิกัดเพี้ยนหลุดนิ้วบนหน้าจอ iPad/มือถือ
+            let x = touch.clientX - containerRect.left - (wrapper.offsetWidth / 2);
+            let y = touch.clientY - containerRect.top - (wrapper.offsetHeight / 2);
+            
+            let pctX = (x / containerRect.width) * 100;
+            let pctY = (y / containerRect.height) * 100;
+            
+            // จำกัดพื้นที่ไม่ให้ออกนอกกรอบจอถลลำไปหลังบ้าน
+            if (pctX < 0) pctX = 0; if (pctX > 85) pctX = 85;
+            if (pctY < 0) pctY = 0; if (pctY > 80) pctY = 80;
+            
+            wrapper.style.position = 'absolute';
+            wrapper.style.left = pctX + '%';
+            wrapper.style.top = pctY + '%';
             wrapper.style.bottom = 'auto';
         };
+
         const handleEnd = (e) => {
             if (!isDragging) return;
-            isDragging = false; wrapper.style.transform = 'scale(1)';
+            isDragging = false; 
+            wrapper.style.transform = 'scale(1)';
+            
             const sushiRect = wrapper.getBoundingClientRect();
             let matched = false;
+            
             document.querySelectorAll('.mouth-zone').forEach(m => {
                 const mRect = m.getBoundingClientRect();
                 if (!(sushiRect.right < mRect.left || sushiRect.left > mRect.right || sushiRect.bottom < mRect.top || sushiRect.top > mRect.bottom)) {
-                    matched = true; checkMatch(item.cat, m);
+                    matched = true; 
+                    checkMatch(item.cat, m);
                 }
             });
-            if (matched) { wrapper.remove(); } else { wrapper.style.position = 'absolute'; wrapper.style.top = 'auto'; wrapper.style.bottom = '4vmin'; }
+            
+            if (matched) { 
+                wrapper.remove(); 
+            } else { 
+                wrapper.style.position = 'absolute'; 
+                wrapper.style.top = 'auto'; 
+                wrapper.style.bottom = '4vmin'; 
+            }
         };
 
         wrapper.addEventListener('mousedown', handleStart);
         document.addEventListener('mousemove', handleMove, {passive: false});
         document.addEventListener('mouseup', handleEnd);
+        
         wrapper.addEventListener('touchstart', handleStart, {passive: false});
         wrapper.addEventListener('touchmove', handleMove, {passive: false});
         wrapper.addEventListener('touchend', handleEnd);
@@ -582,7 +617,7 @@
         let pos = 100;
         let move = setInterval(() => { 
             if(!isDragging) { 
-                pos -= 0.7; wrapper.style.left = pos + '%'; 
+                pos -= 0.6; wrapper.style.left = pos + '%'; 
                 if(pos < -20) { clearInterval(move); if(wrapper.parentNode) wrapper.remove(); } 
             } 
         }, 20);
@@ -615,28 +650,24 @@
 
     function endFeeding() { clearInterval(gameInterval); clearInterval(spawnInterval); document.querySelectorAll('.sushi-wrapper').forEach(s => s.remove()); startBoss(); }
 
-    // 🎙️ ฟังก์ชันเข้าสู่ด่านบอส (พร้อมระบบสั่งงานเปิดเล่นวิดีโอเบื้องหลัง)
     function startBoss() {
-        // 🎬 สั่งเปิดกระตุ้นให้ไฟล์วิดีโอพื้นหลังเริ่มทำงานทันทีแบบสดใหม่
         const bossVid = document.getElementById('boss-video');
         if(bossVid) {
             bossVid.currentTime = 0;
-            bossVid.play().catch(e => console.log("วิดีโอรอการสัมผัสอุปกรณ์"));
+            bossVid.play().catch(e => console.log("Video bypass completed"));
         }
 
         showScreen('boss-screen'); let bTime = 30;
         const typeText = currentTestType === 'pre' ? '(ก่อนเรียน)' : '(หลังเรียน)';
         document.getElementById('boss-score-display').innerText = `E2 Score ${typeText}: ${scoreE2}/100`;
         isBossStageActive = true; isMicActive = false; isProcessing = false;
-        const btn = document.getElementById('mic-btn');
-        btn.innerText = "🎤 Tap to Start Mic"; btn.style.backgroundColor = "#ff4757";
-        btn.classList.remove('mic-active-effect'); btn.style.pointerEvents = "auto";
+        resetMicButtonUI();
 
         bossInterval = setInterval(() => { 
             bTime--; document.getElementById('boss-timer-display').innerText = `Time: ${bTime}`; 
             if(bTime<=0) { 
                 isBossStageActive = false; isMicActive = false;
-                if(recognition) recognition.stop();
+                if(recognition) try { recognition.stop(); } catch(e) {}
                 clearInterval(bossInterval); showResult(); 
             } 
         }, 1000);
@@ -652,8 +683,16 @@
 
     function replayBossWord() { if (currentBossWord) speak(currentBossWord); }
 
+    function resetMicButtonUI() {
+        const btn = document.getElementById('mic-btn');
+        btn.innerText = "🎤 Tap to Start Mic"; 
+        btn.style.backgroundColor = "#ff4757";
+        btn.classList.remove('mic-active-effect'); 
+        btn.style.pointerEvents = "auto";
+    }
+
     function startListening() {
-        if (!recognition) return alert("โปรดใช้งานผ่าน Google Chrome บนอุปกรณ์ที่ต่อไมโครโฟนเพื่อความแม่นยำของระบบ AI ครับ!");
+        if (!recognition) return alert("โปรดเปิดใช้งานผ่าน Google Chrome หรือ Safari เพื่อความเสถียรของคลังไมค์ AI ครับ!");
         if (isMicActive) return;
 
         isMicActive = true; isProcessing = false; 
@@ -687,20 +726,44 @@
                 const typeText = currentTestType === 'pre' ? '(ก่อนเรียน)' : '(หลังเรียน)';
                 document.getElementById('boss-score-display').innerText = `E2 Score ${typeText}: ${scoreE2}/100`;
                 showFeedback('boss-feedback', true); speak("Excellent"); 
+                isMicActive = false;
                 try { recognition.stop(); } catch(e) {}
-                setTimeout(() => { if (isBossStageActive) { nextBossWord(); isProcessing = false; } }, 1500);
+                
+                // 🔒 แก้ปัญหากฎความปลอดภัยเคร่งครัดเรื่องไมค์วนลูปของ iOS: 
+                // ปล่อยให้ปุ่มไมค์ตัดและรีเซ็ตสถานะเป็นสีแดง เพื่อเปิดรอบให้ผู้เรียนแตะสั่งพ่นคำศัพท์คำถัดไปได้อย่างปลอดภัย
+                setTimeout(() => { 
+                    if (isBossStageActive) { 
+                        nextBossWord(); 
+                        isProcessing = false; 
+                        resetMicButtonUI();
+                    } 
+                }, 1500);
             } 
             else if (isFinalWord) {
-                isProcessing = true; showFeedback('boss-feedback', false); speak("Try again"); 
-                setTimeout(() => { isProcessing = false; }, 1000);
+                isProcessing = true; 
+                showFeedback('boss-feedback', false); 
+                speak("Try again"); 
+                isMicActive = false;
+                try { recognition.stop(); } catch(e) {}
+                setTimeout(() => { 
+                    isProcessing = false; 
+                    resetMicButtonUI();
+                }, 1200);
             }
         };
 
-        recognition.onend = () => { if(isMicActive && isBossStageActive) { setTimeout(() => { try { recognition.start(); } catch(e) {} }, 100); } };
+        // จัดการ Error พฤติกรรมตัดสายพ่นเสียงของไมค์ฝั่ง Safari
+        recognition.onerror = (err) => {
+            isMicActive = false;
+            if(!isProcessing && isBossStageActive) { resetMicButtonUI(); }
+        };
+        recognition.onend = () => {
+            isMicActive = false;
+            if(!isProcessing && isBossStageActive) { resetMicButtonUI(); }
+        };
     }
 
     function showResult() { 
-        // 🎬 สั่งหยุดการทำงานพักเครื่องเล่นวิดีโอเบื้องหลังเพื่อประหยัดกำลังเครื่อง
         const bossVid = document.getElementById('boss-video');
         if(bossVid) bossVid.pause();
 
@@ -774,7 +837,6 @@
         
         localStorage.setItem('monsterScores', JSON.stringify(history));
         document.getElementById('player-name').value = '';
-        
         showScreen('leaderboard-screen');
     }
 
