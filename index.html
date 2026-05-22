@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Monster Omakase - Perfect Fit Edition</title>
+    <title>Monster Omakase - Universal Breakout Edition</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Mali:wght@400;700&display=swap');
 
@@ -12,7 +12,6 @@
             font-family: 'Mali', sans-serif !important; 
         }
 
-        /* 📱 ใช้ dvh และ dvw เพื่อคำนวณพื้นที่หน้าจอจริงโดยหักแถบ URL ของมือถือออกอัตโนมัติ */
         body { 
             margin: 0; padding: 0; background-color: #2c3e50; 
             display: flex; justify-content: center; align-items: center; 
@@ -20,7 +19,6 @@
             touch-action: none; -webkit-user-select: none; user-select: none; 
         }
         
-        /* 🖼️ ระบบล็อกสัดส่วนทองคำ 16:9 ไม่ให้เพี้ยน ไม่ระเบิด และไม่โดนบัง */
         #game-container { 
             width: 100dvw; height: 100dvh; 
             max-width: calc(100dvh * (16 / 9)); max-height: calc(100dvw * (9 / 16)); 
@@ -33,7 +31,15 @@
         .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; justify-content: center; align-items: center; background-size: cover; background-position: center; background-repeat: no-repeat; }
         .active { display: flex; }
 
-        /* --- บังคับแนวนอนป้องกันเด็กถือเครื่องผิดด้าน --- */
+        /* 🔒 หน้าต่างพิเศษ ดักจับกรณีเปิดผ่านปุ่ม ดูออนไลน์ ของ OBEC */
+        #iframe-redirect-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(44, 62, 80, 0.98); z-index: 99999;
+            display: none; flex-direction: column; justify-content: center; align-items: center;
+            padding: 4vmin; text-align: center; box-sizing: border-box;
+        }
+
+        /* --- บังคับแนวนอน --- */
         #orientation-warning { display: none; background: #ee5253; color: white; text-align: center; padding: 20px; z-index: 9999; }
         @media screen and (orientation: portrait) {
             #game-container { display: none !important; }
@@ -57,18 +63,13 @@
         #satisfaction-screen { background-image: url('leader board.png'); justify-content: center; }
         #leaderboard-screen { background-image: url('leader board.png'); justify-content: flex-start; padding-top: 5vmin; }
 
-        /* --- UI Elements & Safe Area (หลบติ่งหูและรอยบากของไอโฟน/ไอแพด) --- */
+        /* --- UI Elements & Safe Area --- */
         .top-bar { 
             position: absolute; 
             top: calc(3vmin + env(safe-area-inset-top)); 
-            left: 0;
-            width: 100%; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            z-index: 100; 
-            pointer-events: none; 
-            box-sizing: border-box;
+            left: 0; width: 100%; 
+            display: flex; justify-content: center; align-items: center; 
+            z-index: 100; pointer-events: none; box-sizing: border-box;
             padding-left: calc(4vmin + env(safe-area-inset-left));
             padding-right: calc(4vmin + env(safe-area-inset-right));
         }
@@ -121,7 +122,6 @@
         .how-to-box { background: white; padding: 4vmin; border-radius: 4vmin; width: 80%; text-align: left; border: 1vmin solid #ff9ff3; box-shadow: 0 2vmin 3vmin rgba(0,0,0,0.1); font-size: 2.5vmin; box-sizing: border-box; }
         input[type=range] { width: 100%; accent-color: #ff6b81; }
 
-        /* --- ระบบพล็อตสถิติกราฟดิจิทัล --- */
         .emoji-btn-group { display: flex; justify-content: center; gap: 6vmin; margin: 4vmin 0; }
         .emoji-select-btn { font-size: 9vmin; background: white; border: 0.5vmin solid #ff9ff3; border-radius: 4vmin; padding: 2vmin 4vmin; cursor: pointer; box-shadow: 0 1vmin 0 #f368e0; transition: all 0.1s; }
         .emoji-select-btn:active { transform: translateY(0.8vmin); box-shadow: 0 0.2vmin 0 #f368e0; }
@@ -146,6 +146,17 @@
 <audio id="bg-music" src="bg-music.mp3" loop preload="auto"></audio>
 
 <div id="game-container">
+    <div id="iframe-redirect-screen">
+        <div class="how-to-box" style="text-align: center; width: 85%; border: 1vmin solid #2ed573;">
+            <h1 style="color: #2ed573; font-size: 5vmin; margin: 0; font-weight: bold;">🎮 ตรวจพบการเล่นผ่านคลังสื่อ OBEC</h1>
+            <p style="font-size: 2.8vmin; color: #333; margin: 3vmin 0; line-height: 1.5; font-weight: bold;">
+                เพื่อให้ระบบ **ไมค์ AI (ออกเสียงศัพท์)** และ **เสียงดนตรีเกม** ทำงานได้เสถียร 100% บน iPad และมือถือ<br>
+                กรุณากดปุ่มสีเขียวด้านล่างเพื่อเปิดหน้าต่างเล่นเกมแบบเต็มจอนะครับ!
+            </p>
+            <button class="btn" style="background-color: #2ed573; box-shadow: 0 0.8vmin 0 #27ae60; font-size: 4vmin; padding: 2.5vmin 6vmin;" onclick="breakoutToNewTab()">🚀 เปิดเล่นเกมเต็มจอ</button>
+        </div>
+    </div>
+
     <div id="home-screen" class="screen active">
         <video class="bg-video" autoplay loop muted playsinline>
             <source src="หน้าแรก.mp4" type="video/mp4">
@@ -378,6 +389,11 @@
     let speechVolume = savedSpeech !== null ? parseFloat(savedSpeech) : 1.0;
 
     window.addEventListener('load', () => {
+        // 🔒 ระบบตรวจสอบ: ถ้าเจอว่าตัวเองโดนฝังอยู่ใน Iframe ของ OBEC บังคับกางหน้ากาก Breakout ทันที
+        if (window.self !== window.top) {
+            document.getElementById('iframe-redirect-screen').style.display = 'flex';
+        }
+
         document.getElementById('bgm-slider').value = Math.round(bgmVolume * 100);
         document.getElementById('bgm-val').innerText = Math.round(bgmVolume * 100) + '%';
         document.getElementById('speech-slider').value = Math.round(speechVolume * 100);
@@ -402,6 +418,11 @@
             localStorage.setItem('monsterScores', JSON.stringify(researchStudents));
         }
     });
+
+    // 🚀 ฟังก์ชันสั่งให้สคริปต์สลัดหลุดจากกรอบบล็อกของ OBEC แล้วไปเปิดที่เบราว์เซอร์แท้ของเครื่อง
+    function breakoutToNewTab() {
+        window.open(window.location.href, '_blank');
+    }
 
     function openSettings() { document.getElementById('settings-modal').style.display = 'flex'; }
     function saveSettings() { 
