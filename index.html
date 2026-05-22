@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Monster Omakase - Research & Evaluation Edition</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Mali:wght@400;700&display=swap');
+
+        /* 🎀 บังคับใช้ฟอนต์น่ารัก 'Mali' เหมือนกันหมดทุกจุดทั่วทั้งเกม */
+        body, input, button, table, th, td, div, h1, h2, h3, p, span { 
+            font-family: 'Mali', sans-serif !important; 
+        }
+
+        body { margin: 0; padding: 0; background-color: #2c3e50; display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; overflow: hidden; touch-action: none; -webkit-user-select: none; user-select: none; }
+        
+        #game-container { 
+            width: 100vw; height: 100vh; 
+            max-width: calc(100vh * (16 / 9)); max-height: calc(100vw * (9 / 16)); 
+            aspect-ratio: 16 / 9; background-color: #000; position: relative; 
+            overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+            border-radius: 2vmin; border: 0.8vmin solid #34495e; 
+        }
+
+        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; justify-content: center; align-items: center; background-size: cover; background-position: center; background-repeat: no-repeat; }
+        .active { display: flex; }
+
+        /* --- บังคับแนวนอน --- */
+        #orientation-warning { display: none; background: #ee5253; color: white; text-align: center; padding: 20px; z-index: 9999; }
+        @media screen and (orientation: portrait) {
+            #game-container { display: none !important; }
+            #orientation-warning { display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100vw; height: 100vh; }
+            .rotate-icon { font-size: 15vmin; animation: spin 2s infinite ease-in-out; margin-bottom: 20px; }
+            @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(90deg); } }
+        }
+
+        /* --- Backgrounds --- */
+        #home-screen { justify-content: flex-end; padding-bottom: 5vmin; position: relative; }
+        .bg-video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; pointer-events: none; }
+        #home-screen .btn { position: relative; z-index: 2; } 
+        
+        #how-to-screen { background-image: url('หน้าแรก.png'); background-color: rgba(255,255,255,0.9); background-blend-mode: overlay; }
+        #vocab-practice-screen { background-image: url('หน้าแรก.png'); background-color: rgba(255,255,255,0.9); background-blend-mode: overlay; }
+        #characters-screen { background-image: url('monster characters.png'); background-size: contain; background-color: #fad390; }
+        #test-type-screen { background-image: url('หน้าแรก.png'); background-color: rgba(255, 255, 255, 0.85); background-blend-mode: overlay; }
+        #mode-screen { background-image: url('หน้าแรก.png'); background-color: rgba(255, 255, 255, 0.85); background-blend-mode: overlay; }
+        
+        /* 🎬 ปรับโหมดด่านบอสให้เคลียร์ภาพนิ่งออก เพื่อรองรับ Tag Video คลื่นไหวหลังบ้าน */
+        #boss-screen { justify-content: flex-end; padding-bottom: 5vmin; position: relative; }
+        
+        #result-screen { background-image: url('leader board.png'); justify-content: center; }
+        #satisfaction-screen { background-image: url('leader board.png'); justify-content: center; }
+        #leaderboard-screen { background-image: url('leader board.png'); justify-content: flex-start; padding-top: 5vmin; }
+
+        /* --- UI Elements --- */
+        .top-bar { position: absolute; top: 3vmin; width: 100%; display: flex; justify-content: center; align-items: center; z-index: 100; pointer-events: none; }
+        .top-bar > div, .top-bar > button { pointer-events: auto; }
+        #score-display, #boss-score-display { position: absolute; left: 4vmin; font-size: 3.5vmin; color: #333; text-shadow: 2px 2px #fff; font-weight: bold; }
+        #timer-display, #boss-timer-display { font-size: 4.5vmin; color: #ff4757; background: rgba(255,255,255,0.8); padding: 1vmin 4vmin; border-radius: 4vmin; border: 0.4vmin solid #ff4757; }
+        .btn-home { position: absolute; right: 4vmin; background-color: #54a0ff; box-shadow: 0 0.8vmin 0 #2e86de; border: none; color: white; border-radius: 6vmin; padding: 1.5vmin 3vmin; cursor: pointer; font-size: 2.5vmin; white-space: nowrap; }
+
+        .title-3d { font-size: 7vmin; color: #fff; text-shadow: 0 0.4vmin 0 #ff6b81, 0 0.8vmin 0 #ff6b81, 0 1.2vmin 1.5vmin rgba(0,0,0,0.4); margin-bottom: 3vmin; text-align: center; line-height: 1.2; font-weight: bold; }
+        .target-word { font-size: 10vmin; color: #fffa65; font-weight: bold; text-shadow: 0.5vmin 0.5vmin 0px #ff4757, 1vmin 1vmin 0px #333, 1.5vmin 1.5vmin 2vmin rgba(0,0,0,0.5); letter-spacing: 0.5vmin; margin: 0; }
+        
+        .btn-replay { background: #54a0ff; color: white; border: none; border-radius: 50%; width: 12vmin; height: 12vmin; font-size: 6vmin; cursor: pointer; box-shadow: 0 0.8vmin 0 #2e86de; display: flex; justify-content: center; align-items: center; transition: transform 0.1s; margin-left: 3vmin; }
+        .btn-replay:active { transform: translateY(0.5vmin); box-shadow: 0 0.3vmin 0 #2e86de; }
+
+        .btn { padding: 2vmin 4vmin; font-size: 3vmin; background-color: #ff9ff3; color: white; border: none; border-radius: 6vmin; cursor: pointer; box-shadow: 0 0.8vmin 0 #f368e0; margin: 1vmin; transition: all 0.1s; -webkit-tap-highlight-color: transparent; white-space: nowrap; font-weight: bold; }
+        .btn:active { transform: translateY(0.6vmin); box-shadow: 0 0.2vmin 0 #f368e0; }
+        
+        .mic-active-effect { box-shadow: 0 0 3vmin #ff6b81, 0 1vmin 0 #c0392b !important; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+        .icon-btn-group { position: absolute; top: 3vmin; right: 3vmin; display: flex; gap: 2vmin; z-index: 50; }
+        .icon-btn { font-size: 5vmin; background: white; border: none; border-radius: 50%; width: 9vmin; height: 9vmin; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0.8vmin 0 #ccc; transition: transform 0.1s; padding: 0; }
+        .icon-btn:active { transform: translateY(0.5vmin); box-shadow: 0 0.3vmin 0 #ccc; }
+
+        /* --- Game Elements --- */
+        .mouth-zone { position: absolute; border-radius: 50%; z-index: 10; border: 0.6vmin dashed rgba(255, 255, 255, 0.7); background: rgba(255, 255, 255, 0.2); box-shadow: 0 0 2vmin rgba(255, 255, 255, 0.3); }
+        .conveyor-belt { position: absolute; bottom: 0; width: 100%; height: 18vmin; z-index: 15; pointer-events: none; }
+        
+        .sushi-wrapper { position: absolute; bottom: 5vmin; display: flex; flex-direction: column; align-items: center; cursor: grab; filter: drop-shadow(0 1.5vmin 1.5vmin rgba(0,0,0,0.4)); user-select: none; z-index: 150; touch-action: none; transition: transform 0.1s; }
+        .sushi-topping { width: 115%; height: 6vmin; border-radius: 4vmin 4vmin 1.5vmin 1.5vmin; margin-bottom: -2vmin; z-index: 2; border: 0.4vmin solid rgba(0,0,0,0.1); border-bottom: none; }
+        .sushi-rice { background: #fff; border: 0.6vmin solid #ccc; padding: 1.5vmin 4vmin; border-radius: 2vmin 2vmin 4vmin 4vmin; font-size: 4.5vmin; font-weight: bold; color: #333; z-index: 1; text-align: center; box-shadow: inset -0.8vmin -0.8vmin 1.5vmin rgba(0,0,0,0.08); }
+
+        .topping-1 { background: repeating-linear-gradient(45deg, #ff7f50, #ff7f50 2.5vmin, #ff9f7a 2.5vmin, #ff9f7a 5vmin); }
+        .topping-2 { background: #e74c3c; }
+        .topping-3 { background: #f1c40f; position: relative; }
+        .topping-3::after { content: ''; position: absolute; left: 40%; width: 20%; height: 130%; background: #2f3640; top: -15%; border-radius: 0.5vmin; z-index: 3; }
+        .topping-4 { background: repeating-linear-gradient(90deg, #fff, #fff 2.5vmin, #ff6b81 2.5vmin, #ff6b81 5vmin); border: 0.4vmin solid #ff6b81; }
+        .topping-5 { background: radial-gradient(circle, #ff9f43 40%, transparent 40%), #2f3640; background-size: 3vmin 3vmin; border-radius: 2vmin 2vmin 0 0; }
+
+        .feedback-pop { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%) scale(0); font-size: 8vmin; font-weight: bold; z-index: 1000; pointer-events: none; text-shadow: 0.6vmin 0.6vmin 0 #000; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .feedback-pop.show { transform: translate(-50%, -50%) scale(1.2); }
+        .correct { color: #2ed573; } .wrong { color: #ff4757; }
+        
+        .ranking-container { width: 90%; background: rgba(255, 255, 255, 0.95); border-radius: 3vmin; padding: 2vmin; max-height: 55vh; overflow-y: auto; border: 0.6vmin solid #ff9ff3; margin-bottom: 2vmin; box-shadow: 0 1vmin 2vmin rgba(0,0,0,0.15); }
+        table { width: 100%; border-collapse: collapse; font-size: 2.3vmin; }
+        th { background: #ff6b81; color: white; padding: 1.5vmin; position: sticky; top: 0; font-size: 2.5vmin; }
+        td { padding: 1.2vmin; border-bottom: 0.2vmin solid #ddd; text-align: center; font-weight: bold; }
+        tr:nth-child(even) { background-color: #fbf0f3; }
+        
+        .how-to-box { background: white; padding: 4vmin; border-radius: 4vmin; width: 80%; text-align: left; border: 1vmin solid #ff9ff3; box-shadow: 0 2vmin 3vmin rgba(0,0,0,0.1); font-size: 2.5vmin; }
+        input[type=range] { width: 100%; accent-color: #ff6b81; }
+
+        /* --- 📊 สไตล์ระบบกราฟความพึงพอใจดิจิทัล --- */
+        .emoji-btn-group { display: flex; justify-content: center; gap: 6vmin; margin: 4vmin 0; }
+        .emoji-select-btn { font-size: 9vmin; background: white; border: 0.5vmin solid #ff9ff3; border-radius: 4vmin; padding: 2vmin 4vmin; cursor: pointer; box-shadow: 0 1vmin 0 #f368e0; transition: all 0.1s; }
+        .emoji-select-btn:active { transform: translateY(0.8vmin); box-shadow: 0 0.2vmin 0 #f368e0; }
+        .emoji-select-btn span { font-size: 2.5vmin; display: block; margin-top: 1vmin; color: #333; font-weight: bold; }
+        
+        .chart-container { width: 100%; display: none; flex-direction: column; gap: 2.5vmin; margin-top: 2vmin; background: #fff; padding: 3vmin; border-radius: 3vmin; box-sizing: border-box; border: 0.4vmin solid #ff9ff3; }
+        .chart-row { display: flex; align-items: center; width: 100%; text-align: left; }
+        .chart-label { width: 28%; font-size: 2.8vmin; font-weight: bold; }
+        .chart-bar-wrapper { width: 57%; background: #eceff1; border-radius: 2vmin; overflow: hidden; height: 5vmin; border: 0.3vmin solid #ccc; }
+        .chart-bar { height: 100%; width: 0%; transition: width 1s cubic-bezier(0.1, 1, 0.1, 1); border-radius: 1.5vmin; }
+        .chart-value { width: 15%; font-size: 3vmin; font-weight: bold; text-align: right; color: #ff6b81; }
+    </style>
+</head>
+<body>
+
+<div id="orientation-warning">
+    <h1 style="font-size: 4vmin; font-weight: bold;">Please Rotate Your Device</h1>
+    <p style="font-size: 2.5vmin;">กรุณาหมุนโทรศัพท์เป็นแนวนอนเพื่อเล่นเกมนะครับ!</p>
+</div>
+
+<audio id="bg-music" src="bg-music.mp3" loop preload="auto" autoplay></audio>
+
+<div id="game-container">
+    <div id="home-screen" class="screen active">
+        <video class="bg-video" autoplay loop muted playsinline>
+            <source src="หน้าแรก.mp4" type="video/mp4">
+        </video>
+        <div class="icon-btn-group">
+            <button class="icon-btn" onclick="openDirectSatisfaction()" style="background-color: #ff758f; box-shadow: 0 0.8vmin 0 #c9184a;" title="Satisfaction Graph">❤️</button>
+            <button class="icon-btn" onclick="showScreen('leaderboard-screen')" title="Leaderboard">🏆</button>
+            <button class="icon-btn" onclick="openSettings()" title="Settings">⚙️</button>
+        </div>
+        <div style="display: flex; justify-content: center; gap: 1vmin; z-index: 2; margin-bottom: 2vmin;">
+            <button class="btn" style="background-color: #54a0ff; box-shadow: 0 0.8vmin 0 #2e86de; margin:0;" onclick="showScreen('how-to-screen')">How to Play</button>
+            <button class="btn" style="background-color: #ff9f43; box-shadow: 0 0.8vmin 0 #e67e22; margin:0;" onclick="openVocabPractice()">Practice 📖</button>
+        </div>
+        <button class="btn" style="font-size: 4vmin; padding: 3vmin 8vmin;" onclick="startGameSession()">START</button>
+    </div>
+
+    <div id="vocab-practice-screen" class="screen">
+        <button class="btn" style="position: absolute; top: 2vmin; left: 2vmin; background-color: #ee5253; box-shadow: 0 0.6vmin 0 #c0392b; z-index: 10;" onclick="showScreen('home-screen')">⬅ กลับหน้าแรก</button>
+        <h1 class="title-3d" style="font-size: 5vmin; margin-top: 1vmin; margin-bottom: 1.5vmin;">ฝึกฟังสำเนียงคำศัพท์ 📖</h1>
+        
+        <div style="display: flex; gap: 1.5vmin; margin-bottom: 2vmin; z-index: 10;">
+            <button class="btn" style="font-size: 2.2vmin; padding: 1.2vmin 2.5vmin; background-color: #3498db; box-shadow: 0 0.6vmin 0 #2980b9; margin:0;" onclick="loadPracticeCategory(1)">1: Color & Shape</button>
+            <button class="btn" style="font-size: 2.2vmin; padding: 1.2vmin 2.5vmin; background-color: #e67e22; box-shadow: 0 0.6vmin 0 #d35400; margin:0;" onclick="loadPracticeCategory(2)">2: Pet & Wild</button>
+            <button class="btn" style="font-size: 2.2vmin; padding: 1.2vmin 2.5vmin; background-color: #2ed573; box-shadow: 0 0.6vmin 0 #27ae60; margin:0;" onclick="loadPracticeCategory(3)">3: Body & School</button>
+        </div>
+        
+        <div id="practice-list-container" style="width: 88%; background: rgba(255, 255, 255, 0.95); border-radius: 3vmin; padding: 2.5vmin; height: 42vh; overflow-y: auto; border: 0.6vmin solid #ff9ff3; box-shadow: 0 1vmin 2vmin rgba(0,0,0,0.15); display: flex; flex-wrap: wrap; gap: 1.8vmin; justify-content: center; align-content: flex-start;">
+        </div>
+    </div>
+
+    <div id="settings-modal" class="screen" style="background-color: rgba(0,0,0,0.8); z-index: 9999;">
+        <div class="how-to-box" style="text-align: center; width: 60%;">
+            <h1 class="title-3d" style="font-size: 5vmin; color: #ff6b81; text-shadow: none; margin-top: 0;">⚙️ Audio Settings</h1>
+            <div style="margin: 3vmin 0; text-align: left;">
+                <label style="font-size: 3vmin; font-weight: bold; color: #333;">ดนตรีพื้นหลัง: <span id="bgm-val">15%</span></label>
+                <input type="range" id="bgm-slider" min="0" max="100" value="15" style="height: 3vmin; margin-top: 1vmin;">
+            </div>
+            <div style="margin: 3vmin 0; text-align: left;">
+                <label style="font-size: 3vmin; font-weight: bold; color: #333;">เสียงพูดศัพท์: <span id="speech-val">100%</span></label>
+                <input type="range" id="speech-slider" min="0" max="100" value="100" style="height: 3vmin; margin-top: 1vmin;">
+            </div>
+            <button class="btn" style="background-color: #2ed573; box-shadow: 0 0.8vmin 0 #27ae60; margin-top: 2vmin;" onclick="saveSettings()">Save & Close</button>
+        </div>
+    </div>
+
+    <div id="how-to-screen" class="screen">
+        <button class="btn" style="position: absolute; top: 2vmin; left: 2vmin; background-color: #ee5253; box-shadow: 0 0.6vmin 0 #c0392b;" onclick="showScreen('home-screen')">⬅ Back</button>
+        <div class="how-to-box">
+            <h1 class="title-3d" style="font-size: 5vmin; margin-top: 0; color: #ff6b81; text-shadow: none;">How to Play 💡</h1>
+            <p>1. <b>Pre/Post Selection:</b> เลือกระบบสอบก่อนเรียนหรือหลังเรียนเพื่อเก็บประวัติลงระบบคลังคะแนน</p>
+            <p>2. <b>Drag & Drop:</b> ลากซูชิไปป้อนปากมอนสเตอร์ตามหมวดหมู่ (คิดคะแนนคำละ 10 คะแนน เต็ม 100)</p>
+            <p>3. <b>Boss Stage:</b> กดไมโครโฟนแล้วออกเสียงคำศัพท์ภาษาอังกฤษกับระบบ AI (คิดคะแนนคำละ 10 คะแนน เต็ม 100)</p>
+            <div style="display: flex; justify-content: center; gap: 2vmin; margin-top: 3vmin;">
+                <button class="btn" style="background-color: #ff9f43; box-shadow: 0 0.8vmin 0 #e67e22;" onclick="showScreen('characters-screen')">👾 Meet Monsters</button>
+                <button class="btn" onclick="startGameSession()">Let's Go!</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="characters-screen" class="screen">
+        <button class="btn" style="position: absolute; top: 2vmin; left: 2vmin; background-color: #ee5253; z-index: 100;" onclick="showScreen('how-to-screen')">⬅ Back</button>
+        <button class="btn" style="position: absolute; top: 2vmin; right: 2vmin; background-color: #54a0ff; z-index: 100;" onclick="startGameSession()">Ready! ▶</button>
+    </div>
+
+    <div id="test-type-screen" class="screen">
+        <button class="btn" style="position: absolute; top: 2vmin; left: 2vmin; background-color: #ee5253;" onclick="showScreen('home-screen')">⬅ Back</button>
+        <h1 class="title-3d">Evaluation Mode 📝</h1>
+        <h2 style="color: #fff; font-size: 3.5vmin; margin-bottom: 4vmin; text-shadow: 0 2px 4px rgba(0,0,0,0.5); font-weight: bold;">กรุณาเลือกประเภทการประเมินผล</h2>
+        <div style="display: flex; justify-content: center; gap: 4vmin;">
+            <button class="btn" style="background-color: #3498db; box-shadow: 0 0.8vmin 0 #2980b9; font-size: 4vmin; padding: 3vmin 5vmin;" onclick="selectTestType('pre')">Pre-test (ก่อนเรียน)</button>
+            <button class="btn" style="background-color: #e67e22; box-shadow: 0 0.8vmin 0 #d35400; font-size: 4vmin; padding: 3vmin 5vmin;" onclick="selectTestType('post')">Post-test (หลังเรียน)</button>
+        </div>
+    </div>
+
+    <div id="mode-screen" class="screen">
+        <button class="btn" style="position: absolute; top: 2vmin; left: 2vmin; background-color: #ee5253;" onclick="showScreen('test-type-screen')">⬅ Back</button>
+        <h1 class="title-3d" id="mode-title">Select Mode 🍱</h1>
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 2vmin; padding: 0 10vmin;">
+            <button class="btn" onclick="startGame(1)">1: Color & Shape</button>
+            <button class="btn" onclick="startGame(2)">2: Pet & Wild</button>
+            <button class="btn" onclick="startGame(3)">3: Body & School</button>
+        </div>
+    </div>
+
+    <div id="game-screen" class="screen">
+        <div class="top-bar">
+            <div id="score-display">E1 Score: 0/100</div>
+            <div id="timer-display">Time: 30</div>
+            <button class="btn-home" onclick="location.reload()">🏠 Home</button>
+        </div>
+        <div id="mouth-left" class="mouth-zone"></div>
+        <div id="mouth-right" class="mouth-zone"></div>
+        <div class="conveyor-belt" id="conveyor"></div>
+        <div id="big-feedback" class="feedback-pop">Correct!</div>
+    </div>
+
+    <div id="boss-screen" class="screen">
+        <video class="bg-video" id="boss-video" loop muted playsinline>
+            <source src="boss.mp4" type="video/mp4">
+        </video>
+
+        <div class="top-bar">
+            <div id="boss-score-display">E2 Score: 0/100</div>
+            <div id="boss-timer-display">Time: 30</div>
+            <button class="btn-home" onclick="location.reload()">🏠 Home</button>
+        </div>
+        
+        <h1 class="title-3d" style="position: absolute; top: 12vmin; font-size: 5vmin; z-index: 2;">🎙️ AI BOSS STAGE (ออกเสียงศัพท์)</h1>
+        
+        <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 4vmin; position: relative; z-index: 2;">
+            <div class="target-word" id="word-to-say">Word</div>
+            <button class="btn-replay" onclick="replayBossWord()" title="ฟังอีกครั้ง">🔊</button>
+        </div>
+
+        <button class="btn" id="mic-btn" style="background-color: #ff4757; position: relative; z-index: 2;" onclick="startListening()">🎤 Tap to Start Mic</button>
+        <div id="boss-feedback" class="feedback-pop">Correct!</div>
+    </div>
+
+    <div id="result-screen" class="screen">
+        <div class="how-to-box" style="text-align: center; width: 65%;">
+            <h1 style="color: #ff6b81; font-size: 5vmin; margin:0; font-weight: bold;">Excellent! 🌟</h1>
+            <h2 id="final-score" style="font-size: 3.5vmin; color: #f39c12; margin: 2vmin 0; white-space: pre-line; font-weight: bold;">Score: 0</h2>
+            <input type="text" id="player-name" style="padding: 1.5vmin; font-size: 3vmin; text-align: center; border-radius: 2vmin; border: 0.4vmin solid #ff9ff3; width: 60%; font-weight: bold;" placeholder="พิมพ์ชื่อของนักเรียน">
+            <br><br>
+            <button class="btn" style="background-color: #2ed573; box-shadow: 0 0.8vmin 0 #27ae60;" onclick="goToSatisfaction()">บันทึกคะแนน & ถัดไป ▶</button>
+        </div>
+    </div>
+
+    <div id="satisfaction-screen" class="screen">
+        <div class="how-to-box" style="text-align: center; width: 75%; max-height: 85vh; overflow-y: auto;">
+            <h1 class="title-3d" style="font-size: 4.5vmin; color: #ff6b81; text-shadow: none; margin: 0;">😊 Emoji Feedback System</h1>
+            <h3 style="margin: 1vmin 0; color: #555; font-weight: bold;">นักเรียนรู้สึกอย่างไรกับการเรียนด้วยเกมนี้ครับ/ค่ะ?</h3>
+            
+            <div class="emoji-btn-group" id="emoji-selectors">
+                <button class="emoji-select-btn" onclick="submitSatisfaction('good')">😊<span>สนุกมาก/ชอบมาก</span></button>
+                <button class="emoji-select-btn" onclick="submitSatisfaction('neutral')">😐<span>เฉยๆ/ปกติ</span></button>
+                <button class="emoji-select-btn" onclick="submitSatisfaction('bad')">☹️<span>ไม่สนุก</span></button>
+            </div>
+
+            <div class="chart-container" id="satisfaction-chart">
+                <h3 style="margin: 0; color: #2e86de; font-weight: bold;">📊 แผนภูมิแสดงผลความพึงพอใจของชั้นเรียน</h3>
+                <div class="chart-row">
+                    <div class="chart-label">😊 สนุกมาก/ชอบมาก</div>
+                    <div class="chart-bar-wrapper">
+                        <div class="chart-bar" id="bar-good" style="background-color: #2ed573;"></div>
+                    </div>
+                    <div class="chart-value" id="val-good">97.14%</div>
+                </div>
+                <div class="chart-row">
+                    <div class="chart-label">😐 เฉยๆ/ปกติ</div>
+                    <div class="chart-bar-wrapper">
+                        <div class="chart-bar" id="bar-neutral" style="background-color: #ff9f43;"></div>
+                    </div>
+                    <div class="chart-value" id="val-neutral">2.86%</div>
+                </div>
+                <div class="chart-row">
+                    <div class="chart-label">☹️ ไม่สนุก</div>
+                    <div class="chart-bar-wrapper">
+                        <div class="chart-bar" id="bar-bad" style="background-color: #ff4757;"></div>
+                    </div>
+                    <div class="chart-value" id="val-bad">0%</div>
+                </div>
+                <button class="btn" id="satis-nav-btn" style="margin-top: 2vmin; background-color: #54a0ff; box-shadow: 0 0.8vmin 0 #2e86de;" onclick="finishSession()">ดูตารางคะแนนรวม (Leaderboard) 🏆</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="leaderboard-screen" class="screen">
+        <button class="btn" style="position: absolute; top: 2vmin; left: 2vmin; background-color: #ee5253; box-shadow: 0 0.6vmin 0 #c0392b; z-index: 10;" onclick="location.reload()">⬅ กลับหน้าแรก</button>
+        <h1 class="title-3d" style="margin-top: 1vmin; font-size: 5vmin;">🏆 Leaderboard</h1>
+        <div class="ranking-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th width="10%">อันดับ</th>
+                        <th width="40%">ชื่อ-นามสกุล</th>
+                        <th width="15%">ก่อนเรียน (Pre)</th>
+                        <th width="15%">หลังเรียน (Post)</th>
+                        <th width="10%">ผลประเมิน</th>
+                        <th width="10%">จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-tbody"></tbody>
+            </table>
+        </div>
+        <button class="btn" style="background-color: #ff9ff3; box-shadow: 0 0.8vmin 0 #f368e0;" onclick="showScreen('test-type-screen')">เริ่มเล่นรอบใหม่ ▶</button>
+    </div>
+</div>
+
+<script>
+    const modesConfig = {
+        1: { bg: "url('โหมดที่ 1.png')", vocab: [{word:"Red",cat:"color"}, {word:"Blue",cat:"color"}, {word:"Green",cat:"color"}, {word:"Yellow",cat:"color"}, {word:"Pink",cat:"color"}, {word:"Black",cat:"color"}, {word:"White",cat:"color"}, {word:"Orange",cat:"color"}, {word:"Purple",cat:"color"}, {word:"Brown",cat:"color"}, {word:"Circle",cat:"shape"}, {word:"Square",cat:"shape"}, {word:"Triangle",cat:"shape"}, {word:"Star",cat:"shape"}, {word:"Heart",cat:"shape"}, {word:"Oval",cat:"shape"}, {word:"Diamond",cat:"shape"}, {word:"Cross",cat:"shape"}, {word:"Arrow",cat:"shape"}, {word:"Line",cat:"shape"}], leftMouth:{cat:"shape",l:"28%",t:"32%",w:"22%",h:"25%"}, rightMouth:{cat:"color",l:"70%",t:"43%",w:"16%",h:"18%"} },
+        2: { bg: "url('โหมดที่ 2.png')", vocab: [{word:"Dog",cat:"pet"}, {word:"Cat",cat:"pet"}, {word:"Fish",cat:"pet"}, {word:"Bird",cat:"pet"}, {word:"Rabbit",cat:"pet"}, {word:"Hamster",cat:"pet"}, {word:"Turtle",cat:"pet"}, {word:"Mouse",cat:"pet"}, {word:"Parrot",cat:"pet"}, {word:"Puppy",cat:"pet"}, {word:"Lion",cat:"wild"}, {word:"Tiger",cat:"wild"}, {word:"Elephant",cat:"wild"}, {word:"Monkey",cat:"wild"}, {word:"Bear",cat:"wild"}, {word:"Snake",cat:"wild"}, {word:"Zebra",cat:"wild"}, {word:"Giraffe",cat:"wild"}, {word:"Hippo",cat:"wild"}, {word:"Fox",cat:"wild"}], leftMouth:{cat:"wild",l:"32%",t:"38%",w:"15%",h:"20%"}, rightMouth:{cat:"pet",l:"69%",t:"35%",w:"12%",h:"16%"} },
+        3: { bg: "url('โหมดที่ 3.png')", vocab: [{word:"Head",cat:"body"}, {word:"Eye",cat:"body"}, {word:"Ear",cat:"body"}, {word:"Nose",cat:"body"}, {word:"Mouth",cat:"body"}, {word:"Arm",cat:"body"}, {word:"Hand",cat:"body"}, {word:"Leg",cat:"body"}, {word:"Foot",cat:"body"}, {word:"Hair",cat:"body"}, {word:"Pen",cat:"school"}, {word:"Pencil",cat:"school"}, {word:"Book",cat:"school"}, {word:"Ruler",cat:"school"}, {word:"Eraser",cat:"school"}, {word:"Desk",cat:"school"}, {word:"Chair",cat:"school"}, {word:"Bag",cat:"school"}, {word:"Paper",cat:"school"}, {word:"Board",cat:"school"}], leftMouth:{cat:"body",l:"29%",t:"42%",w:"15%",h:"22%"}, rightMouth:{cat:"school",l:"62%",t:"38%",w:"12%",h:"20%"} }
+    };
+
+    const fuzzyDict = { 
+        "red":["red","เรด"], "blue":["blue","บลู"], "green":["green","กรีน"], "yellow":["yellow","เยลโล่"], "pink":["pink","พิงค์"], "black":["black","แบล็ค"], "white":["white","ไวท์"], "orange":["orange","ออเรนจ์"], "purple":["purple","เพоเพิล"], "brown":["brown","บราวน์"], "circle":["circle","เซอเคิล"], "square":["square","สแควร์"], "triangle":["triangle","ไทรแองเกิล"], "star":["star","สตาร์"], "heart":["heart","ฮาร์ท"], "oval":["oval","โอวอล"], "diamond":["diamond","ไดมอนด์"], "cross":["cross","ครอส"], "arrow":["arrow","แอร์โรว์"], "line":["line","ไลน์"], "dog":["dog","ด็อก"], "cat":["cat","แคท"], "fish":["fish","ฟิช"], "bird":["bird","เบิร์ด"], "rabbit":["rabbit","แรบบิท"], "hamster":["hamster","แฮมสเตอร์"], "turtle":["turtle","เทอเทิล"], "mouse":["mouse","เมาส์"], "parrot":["parrot","แพรรอต"], "puppy":["puppy","พัพพี่"], "lion":["lion","ไลออน"], "tiger":["tiger","ไทเกอร์"], "elephant":["elephant","เอเลเฟนท์"], "monkey":["monkey","มังกี้"], "bear":["bear","แบร์"], "snake":["snake","สเน็ค"], "zebra":["zebra","ซีบร้า"], "giraffe":["giraffe","จีราฟ"], "hippo":["hippo","ฮิปโป"], "fox":["fox","ฟ็อกซ์"], "head":["head","เฮด"], "eye":["eye","อาย"], "ear":["ear","เอียร์"], "nose":["nose","โนส"], "mouth":["mouth","เมาท์"], "arm":["arm","อาร์ม"], "hand":["hand","แฮนด์"], "leg":["leg","เลก"], "foot":["foot","ฟุต"], "hair":["hair","แฮร์"], "pen":["pen","เพน"], "pencil":["pencil","เพนซิล"], "book":["book","บุ๊ค"], "ruler":["ruler","รูเลอร์"], "eraser":["eraser","อีเรเซอร์"], "desk":["desk","เดสก์"], "chair":["chair","แชร์"], "bag":["bag","แบ็ก"], "paper":["paper","เพเพอร์"], "board":["board","บอร์ด"]
+    };
+
+    const researchStudents = [
+        { name: "เด็กหญิง กนกนิภา ทวีการไล", pre: 60, post: 93, stars: "⭐⭐⭐" },
+        { name: "เด็กหญิง หยาดทิพย์ บุญทล", pre: 55, post: 91, stars: "⭐⭐⭐" },
+        { name: "เด็กหญิง พชรพร ภูมิโคกรักษ์", pre: 49, post: 90, stars: "⭐⭐⭐" },
+        { name: "เด็กชาย กานต์ณภัทร โคตรวิทย์", pre: 52, post: 88, stars: "⭐⭐⭐" },
+        { name: "เด็กชาย จักรกฤต สุริยมาศ", pre: 54, post: 89, stars: "⭐⭐⭐" },
+        { name: "เด็กหญิง กมลรัตน์ บุญมา", pre: 53, post: 88, stars: "⭐⭐⭐" },
+        { name: "เด็กหญิง แพรวา แสงราช", pre: 51, post: 84, stars: "⭐⭐⭐" },
+        { name: "เด็กหญิง อรัญญา สิทธิถาวร", pre: 48, post: 84, stars: "⭐⭐⭐" },
+        { name: "เด็กชาย ณภัทร จันทวัน", pre: 45, post: 82, stars: "⭐⭐⭐" },
+        { name: "เด็กหญิง กมลวรรณ ขวัญอยู่", pre: 42, post: 80, stars: "⭐⭐" },
+        { name: "เด็กชาย ธนภัทร แก้วพันงาม", pre: 34, post: 76, stars: "⭐⭐" },
+        { name: "เด็กชาย ธนโชติ สอนธิราช", pre: 32, post: 75, stars: "⭐⭐" },
+        { name: "เด็กชาย เทพฤทธิ์ ขวัญใจ", pre: 30, post: 74, stars: "⭐⭐" },
+        { name: "เด็กชาย ธนภัทร พวงแก้ว", pre: 28, post: 73, stars: "⭐⭐" }
+    ];
+
+    let baseGood = 34;
+    let baseNeutral = 1;
+    let baseBad = 0;
+
+    let scoreE1 = 0, scoreE2 = 0, totalScore = 0, timeLeft = 30;
+    let gameInterval, spawnInterval, bossInterval, currentMode, vocabPool = [];
+    let currentBossWord = "", isMicActive = false, isBossStageActive = false, isProcessing = false;
+    let nativeVoice = null;
+    let currentPlayerName = "";
+    let currentTestType = "post"; 
+    let directAccessMode = false; 
+
+    let savedBgm = localStorage.getItem('monsterBgmVolume');
+    let bgmVolume = savedBgm !== null ? parseFloat(savedBgm) : 0.15; 
+    let savedSpeech = localStorage.getItem('monsterSpeechVolume');
+    let speechVolume = savedSpeech !== null ? parseFloat(savedSpeech) : 1.0;
+
+    window.addEventListener('load', () => {
+        document.getElementById('bgm-slider').value = Math.round(bgmVolume * 100);
+        document.getElementById('bgm-val').innerText = Math.round(bgmVolume * 100) + '%';
+        document.getElementById('speech-slider').value = Math.round(speechVolume * 100);
+        document.getElementById('speech-val').innerText = Math.round(speechVolume * 100) + '%';
+        
+        const music = document.getElementById('bg-music');
+        if(music) {
+            music.volume = bgmVolume;
+            music.play().catch(e => {
+                const forcePlay = () => {
+                    music.play().catch(err => console.log(err));
+                    document.removeEventListener('click', forcePlay);
+                    document.removeEventListener('touchstart', forcePlay);
+                };
+                document.addEventListener('click', forcePlay);
+                document.addEventListener('touchstart', forcePlay);
+            });
+        }
+
+        if (!localStorage.getItem('monsterScores')) {
+            localStorage.setItem('monsterScores', JSON.stringify(researchStudents));
+        }
+    });
+
+    function openSettings() { document.getElementById('settings-modal').style.display = 'flex'; }
+    function saveSettings() { 
+        localStorage.setItem('monsterBgmVolume', bgmVolume);
+        localStorage.setItem('monsterSpeechVolume', speechVolume);
+        document.getElementById('settings-modal').style.display = 'none'; 
+    }
+
+    document.getElementById('bgm-slider').addEventListener('input', function() {
+        bgmVolume = this.value / 100;
+        document.getElementById('bgm-val').innerText = this.value + '%';
+        const music = document.getElementById('bg-music');
+        if(music) music.volume = bgmVolume;
+    });
+
+    document.getElementById('speech-slider').addEventListener('input', function() {
+        speechVolume = this.value / 100;
+        document.getElementById('speech-val').innerText = this.value + '%';
+    });
+
+    function loadNativeVoice() {
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length === 0) return;
+        const preferredNames = ['Google US English', 'Microsoft Zira', 'Microsoft Aria', 'Samantha', 'Karen', 'Daniel'];
+        for (let name of preferredNames) {
+            nativeVoice = voices.find(v => v.name.includes(name));
+            if (nativeVoice) break;
+        }
+        if (!nativeVoice) nativeVoice = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Premium') || v.name.includes('Enhanced')));
+        if (!nativeVoice) nativeVoice = voices.find(v => v.lang === 'en-US') || voices.find(v => v.lang.startsWith('en'));
+    }
+    loadNativeVoice();
+    if (window.speechSynthesis.onvoiceschanged !== undefined) window.speechSynthesis.onvoiceschanged = loadNativeVoice;
+
+    function speak(t) {
+        window.speechSynthesis.cancel();
+        let msg = new SpeechSynthesisUtterance(t);
+        if (!nativeVoice) loadNativeVoice();
+        if (nativeVoice) msg.voice = nativeVoice;
+        msg.lang = 'en-US'; 
+        msg.rate = 0.9;
+        msg.volume = speechVolume; 
+        window.speechSynthesis.speak(msg);
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition;
+    if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.lang = 'en-US';
+        recognition.interimResults = true; 
+        recognition.continuous = true;
+    }
+
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        if(id === 'leaderboard-screen') displayLeaderboard();
+        
+        if(id === 'satisfaction-screen') {
+            document.getElementById('satisfaction-chart').style.display = 'flex';
+            updateSatisfactionChart(0); 
+            
+            const navBtn = document.getElementById('satis-nav-btn');
+            if (directAccessMode) {
+                document.getElementById('emoji-selectors').style.display = 'flex'; 
+                navBtn.innerText = "กลับหน้าหลัก 🏠";
+                navBtn.style.backgroundColor = "#2ed573";
+                navBtn.style.boxShadow = "0 0.8vmin 0 #27ae60";
+            } else {
+                navBtn.innerText = "ดูตารางคะแนนรวม (Leaderboard) 🏆";
+                navBtn.style.backgroundColor = "#54a0ff";
+                navBtn.style.boxShadow = "0 0.8vmin 0 #2e86de";
+            }
+        }
+    }
+
+    function openVocabPractice() {
+        showScreen('vocab-practice-screen');
+        loadPracticeCategory(1);
+    }
+
+    function loadPracticeCategory(m) {
+        const container = document.getElementById('practice-list-container');
+        container.innerHTML = '';
+        const targetConfig = modesConfig[m];
+        
+        const wordEmojiDict = {
+            "Red": "🔴", "Blue": "🔵", "Green": "🟢", "Yellow": "🟡", "Pink": "🩷",
+            "Black": "⚫", "White": "⚪", "Orange": "🟠", "Purple": "🟣", "Brown": "🟤",
+            "Circle": "⭕", "Square": "⬛", "Triangle": "🔺", "Star": "⭐", "Heart": "❤️",
+            "Oval": "🥚", "Diamond": "💎", "Cross": "✖️", "Arrow": "➡️", "Line": "➖",
+            "Dog": "🐶", "Cat": "🐱", "Fish": "🐟", "Bird": "🐦", "Rabbit": "🐰",
+            "Hamster": "🐹", "Turtle": "🐢", "Mouse": "🐭", "Parrot": "🦜", "Puppy": "🐕",
+            "Lion": "🦁", "Tiger": "🐯", "Elephant": "🐘", "Monkey": "🐵", "Bear": "🐻",
+            "Snake": "🐍", "Zebra": "🦓", "Giraffe": "🦒", "Hippo": "🦛", "Fox": "🦊",
+            "Head": "👤", "Eye": "👁️", "Ear": "👂", "Nose": "👃", "Mouth": "👄",
+            "Arm": "💪", "Hand": "✋", "Leg": "🦵", "Foot": "🦶", "Hair": "💇",
+            "Pen": "🖊️", "Pencil": "✏️", "Book": "📖", "Ruler": "📏", "Eraser": "🧼",
+            "Desk": "🟫", "Chair": "🪑", "Bag": "🎒", "Paper": "📄", "Board": "📋"
+        };
+
+        targetConfig.vocab.forEach(item => {
+            const card = document.createElement('div');
+            card.style.cssText = "background: #fff; border: 0.4vmin solid #ff9ff3; padding: 1.5vmin 2.5vmin; border-radius: 2vmin; display: flex; align-items: center; gap: 2vmin; box-shadow: 0 0.5vmin 0 #f368e0; font-size: 2.6vmin; font-weight: bold; min-width: 22vmin; justify-content: space-between;";
+            let emojiTag = wordEmojiDict[item.word] || "📝";
+
+            card.innerHTML = `
+                <span>${emojiTag} ${item.word}</span> 
+                <button class="btn" style="padding:0; margin:0; border-radius:50%; width:5.5vmin; height:5.5vmin; display:flex; justify-content:center; align-items:center; background-color:#54a0ff; box-shadow:0 0.4vmin 0 #2e86de; font-size:2.2vmin;" onclick="speak('${item.word}')">🔊</button>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function openDirectSatisfaction() {
+        directAccessMode = true;
+        showScreen('satisfaction-screen');
+    }
+
+    function startGameSession() { showScreen('test-type-screen'); }
+
+    function selectTestType(type) {
+        currentTestType = type;
+        const modeTitle = document.getElementById('mode-title');
+        const typeText = currentTestType === 'pre' ? 'Pre-test (ก่อนเรียน)' : 'Post-test (หลังเรียน)';
+        modeTitle.innerText = `Select Mode [${typeText}] 🍱`;
+        showScreen('mode-screen');
+    }
+
+    function startGame(m) {
+        directAccessMode = false; 
+        currentMode = modesConfig[m]; scoreE1 = 0; scoreE2 = 0; totalScore = 0; timeLeft = 30;
+        document.getElementById('game-screen').style.backgroundImage = currentMode.bg;
+        setupMouths(); showScreen('game-screen');
+        updateScoreDisplay();
+        gameInterval = setInterval(() => {
+            timeLeft--; document.getElementById('timer-display').innerText = `Time: ${timeLeft}`;
+            if(timeLeft<=0) endFeeding();
+        }, 1000);
+        spawnSushi(); spawnInterval = setInterval(spawnSushi, 1800);
+    }
+
+    function setupMouths() {
+        const ml = document.getElementById('mouth-left'), mr = document.getElementById('mouth-right');
+        ml.style.left = currentMode.leftMouth.l; ml.style.top = currentMode.leftMouth.t;
+        ml.style.width = currentMode.leftMouth.w; ml.style.height = currentMode.leftMouth.h;
+        mr.style.left = currentMode.rightMouth.l; mr.style.top = currentMode.rightMouth.t;
+        mr.style.width = currentMode.rightMouth.w; mr.style.height = currentMode.rightMouth.h;
+        ml.dataset.cat = currentMode.leftMouth.cat; mr.dataset.cat = currentMode.rightMouth.cat;
+    }
+
+    function spawnSushi() {
+        if (vocabPool.length === 0) vocabPool = [...currentMode.vocab];
+        const randomIndex = Math.floor(Math.random() * vocabPool.length);
+        const item = vocabPool.splice(randomIndex, 1)[0];
+        const toppingType = Math.floor(Math.random() * 5) + 1;
+        const wrapper = document.createElement('div'); wrapper.className = 'sushi-wrapper'; 
+        wrapper.innerHTML = `<div class="sushi-topping topping-${toppingType}"></div><div class="sushi-rice">${item.word}</div>`;
+        document.getElementById('game-screen').appendChild(wrapper);
+        speak(item.word);
+
+        let isDragging = false;
+        const handleStart = (e) => { isDragging = true; wrapper.style.zIndex = 1000; wrapper.style.transform = 'scale(1.1)'; };
+        const handleMove = (e) => {
+            if (!isDragging) return; 
+            e.preventDefault(); 
+            let touch = e.touches ? e.touches[0] : e;
+            wrapper.style.position = 'fixed';
+            wrapper.style.left = (touch.clientX - wrapper.offsetWidth / 2) + 'px';
+            wrapper.style.top = (touch.clientY - wrapper.offsetHeight / 2) + 'px';
+            wrapper.style.bottom = 'auto';
+        };
+        const handleEnd = (e) => {
+            if (!isDragging) return;
+            isDragging = false; wrapper.style.transform = 'scale(1)';
+            const sushiRect = wrapper.getBoundingClientRect();
+            let matched = false;
+            document.querySelectorAll('.mouth-zone').forEach(m => {
+                const mRect = m.getBoundingClientRect();
+                if (!(sushiRect.right < mRect.left || sushiRect.left > mRect.right || sushiRect.bottom < mRect.top || sushiRect.top > mRect.bottom)) {
+                    matched = true; checkMatch(item.cat, m);
+                }
+            });
+            if (matched) { wrapper.remove(); } else { wrapper.style.position = 'absolute'; wrapper.style.top = 'auto'; wrapper.style.bottom = '4vmin'; }
+        };
+
+        wrapper.addEventListener('mousedown', handleStart);
+        document.addEventListener('mousemove', handleMove, {passive: false});
+        document.addEventListener('mouseup', handleEnd);
+        wrapper.addEventListener('touchstart', handleStart, {passive: false});
+        wrapper.addEventListener('touchmove', handleMove, {passive: false});
+        wrapper.addEventListener('touchend', handleEnd);
+
+        let pos = 100;
+        let move = setInterval(() => { 
+            if(!isDragging) { 
+                pos -= 0.7; wrapper.style.left = pos + '%'; 
+                if(pos < -20) { clearInterval(move); if(wrapper.parentNode) wrapper.remove(); } 
+            } 
+        }, 20);
+    }
+
+    function checkMatch(cat, mouth) {
+        const correct = (cat === mouth.dataset.cat);
+        showFeedback('big-feedback', correct);
+        if(correct) { 
+            scoreE1 += 10; 
+            if(scoreE1 > 100) scoreE1 = 100;
+            speak("Correct"); 
+        } else { 
+            scoreE1 -= 5; if(scoreE1 < 0) scoreE1 = 0;
+            speak("Wrong"); 
+        }
+        updateScoreDisplay();
+    }
+
+    function updateScoreDisplay() {
+        const typeText = currentTestType === 'pre' ? '(ก่อนเรียน)' : '(หลังเรียน)';
+        document.getElementById('score-display').innerText = `E1 Score ${typeText}: ${scoreE1}/100`;
+    }
+
+    function showFeedback(id, correct) {
+        const fb = document.getElementById(id); fb.innerText = correct ? "Correct! ✅" : "Wrong! ❌";
+        fb.className = `feedback-pop show ${correct ? 'correct' : 'wrong'}`;
+        setTimeout(() => fb.classList.remove('show'), 800);
+    }
+
+    function endFeeding() { clearInterval(gameInterval); clearInterval(spawnInterval); document.querySelectorAll('.sushi-wrapper').forEach(s => s.remove()); startBoss(); }
+
+    // 🎙️ ฟังก์ชันเข้าสู่ด่านบอส (พร้อมระบบสั่งงานเปิดเล่นวิดีโอเบื้องหลัง)
+    function startBoss() {
+        // 🎬 สั่งเปิดกระตุ้นให้ไฟล์วิดีโอพื้นหลังเริ่มทำงานทันทีแบบสดใหม่
+        const bossVid = document.getElementById('boss-video');
+        if(bossVid) {
+            bossVid.currentTime = 0;
+            bossVid.play().catch(e => console.log("วิดีโอรอการสัมผัสอุปกรณ์"));
+        }
+
+        showScreen('boss-screen'); let bTime = 30;
+        const typeText = currentTestType === 'pre' ? '(ก่อนเรียน)' : '(หลังเรียน)';
+        document.getElementById('boss-score-display').innerText = `E2 Score ${typeText}: ${scoreE2}/100`;
+        isBossStageActive = true; isMicActive = false; isProcessing = false;
+        const btn = document.getElementById('mic-btn');
+        btn.innerText = "🎤 Tap to Start Mic"; btn.style.backgroundColor = "#ff4757";
+        btn.classList.remove('mic-active-effect'); btn.style.pointerEvents = "auto";
+
+        bossInterval = setInterval(() => { 
+            bTime--; document.getElementById('boss-timer-display').innerText = `Time: ${bTime}`; 
+            if(bTime<=0) { 
+                isBossStageActive = false; isMicActive = false;
+                if(recognition) recognition.stop();
+                clearInterval(bossInterval); showResult(); 
+            } 
+        }, 1000);
+        nextBossWord();
+    }
+
+    function nextBossWord() {
+        const item = currentMode.vocab[Math.floor(Math.random() * currentMode.vocab.length)];
+        currentBossWord = item.word; 
+        document.getElementById('word-to-say').innerText = currentBossWord; 
+        speak(currentBossWord);
+    }
+
+    function replayBossWord() { if (currentBossWord) speak(currentBossWord); }
+
+    function startListening() {
+        if (!recognition) return alert("โปรดใช้งานผ่าน Google Chrome บนอุปกรณ์ที่ต่อไมโครโฟนเพื่อความแม่นยำของระบบ AI ครับ!");
+        if (isMicActive) return;
+
+        isMicActive = true; isProcessing = false; 
+        const btn = document.getElementById('mic-btn'); 
+        btn.innerText = "🔴 Mic Active (พ่นเสียงได้เลย!)"; 
+        btn.style.backgroundColor = "#ff6b81"; btn.classList.add('mic-active-effect'); btn.style.pointerEvents = "none";
+        
+        try { recognition.start(); } catch(e) {}
+
+        recognition.onresult = (event) => {
+            if (isProcessing || !isBossStageActive) return; 
+            let currentTranscript = '';
+            let isFinalWord = false;
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                currentTranscript += event.results[i][0].transcript.toLowerCase();
+                if (event.results[i].isFinal) isFinalWord = true;
+            }
+            let spoken = currentTranscript.trim().replace(/[^a-z0-9ก-ฮะ-์ ]/gi, "");
+            let spokenWords = spoken.split(/\s+/);
+            let target = currentBossWord.toLowerCase();
+            let isCorrect = (spoken === target || spokenWords.includes(target));
+            
+            if (!isCorrect && fuzzyDict[target]) {
+                isCorrect = fuzzyDict[target].some(val => spoken === val || spokenWords.includes(val));
+            }
+            
+            if (isCorrect) {
+                isProcessing = true; 
+                scoreE2 += 10; 
+                if(scoreE2 > 100) scoreE2 = 100;
+                const typeText = currentTestType === 'pre' ? '(ก่อนเรียน)' : '(หลังเรียน)';
+                document.getElementById('boss-score-display').innerText = `E2 Score ${typeText}: ${scoreE2}/100`;
+                showFeedback('boss-feedback', true); speak("Excellent"); 
+                try { recognition.stop(); } catch(e) {}
+                setTimeout(() => { if (isBossStageActive) { nextBossWord(); isProcessing = false; } }, 1500);
+            } 
+            else if (isFinalWord) {
+                isProcessing = true; showFeedback('boss-feedback', false); speak("Try again"); 
+                setTimeout(() => { isProcessing = false; }, 1000);
+            }
+        };
+
+        recognition.onend = () => { if(isMicActive && isBossStageActive) { setTimeout(() => { try { recognition.start(); } catch(e) {} }, 100); } };
+    }
+
+    function showResult() { 
+        // 🎬 สั่งหยุดการทำงานพักเครื่องเล่นวิดีโอเบื้องหลังเพื่อประหยัดกำลังเครื่อง
+        const bossVid = document.getElementById('boss-video');
+        if(bossVid) bossVid.pause();
+
+        totalScore = Math.round((scoreE1 + scoreE2) / 2);
+        const typeLabel = currentTestType === 'pre' ? 'Pre-test (ก่อนเรียน)' : 'Post-test (หลังเรียน)';
+        document.getElementById('final-score').innerText = `ระบบประเมินผล: ${typeLabel}\n\nE1 (คัดแยก): ${scoreE1}/100 | E2 (ออกเสียง): ${scoreE2}/100 \n\n คะแนนเฉลี่ยรวมด่าน: ${totalScore} คะแนน`; 
+        showScreen('result-screen'); 
+    }
+
+    function goToSatisfaction() {
+        currentPlayerName = document.getElementById('player-name').value || "นักเรียนกลุ่มทดลอง";
+        showScreen('satisfaction-screen');
+    }
+
+    function submitSatisfaction(rating) {
+        document.getElementById('emoji-selectors').style.display = 'none';
+        updateSatisfactionChart(rating);
+    }
+
+    function updateSatisfactionChart(newRating) {
+        if (newRating === 'good') baseGood++;
+        if (newRating === 'neutral') baseNeutral++;
+        if (newRating === 'bad') baseBad++;
+
+        let totalVotes = baseGood + baseNeutral + baseBad;
+        let pctGood = ((baseGood / totalVotes) * 100).toFixed(2);
+        let pctNeutral = ((baseNeutral / totalVotes) * 100).toFixed(2);
+        let pctBad = ((baseBad / totalVotes) * 100).toFixed(2);
+
+        setTimeout(() => {
+            document.getElementById('bar-good').style.width = pctGood + '%';
+            document.getElementById('bar-neutral').style.width = pctNeutral + '%';
+            document.getElementById('bar-bad').style.width = pctBad + '%';
+
+            document.getElementById('val-good').innerText = pctGood + '%';
+            document.getElementById('val-neutral').innerText = pctNeutral + '%';
+            document.getElementById('val-bad').innerText = pctBad + '%';
+        }, 100);
+    }
+
+    function finishSession() {
+        if (directAccessMode) {
+            location.reload();
+            return;
+        }
+
+        let history = JSON.parse(localStorage.getItem('monsterScores')) || [];
+        let studentIndex = history.findIndex(s => s.name.trim() === currentPlayerName.trim());
+        
+        if (studentIndex !== -1) {
+            if (currentTestType === 'pre') {
+                history[studentIndex].pre = totalScore;
+            } else {
+                history[studentIndex].post = totalScore;
+            }
+            let activeScore = history[studentIndex].post !== "-" ? history[studentIndex].post : history[studentIndex].pre;
+            history[studentIndex].stars = activeScore >= 85 ? "⭐⭐⭐" : (activeScore >= 75 ? "⭐⭐" : "⭐");
+        } else {
+            if (currentTestType === 'pre') {
+                history.push({ name: currentPlayerName, pre: totalScore, post: "-", stars: totalScore >= 85 ? "⭐⭐⭐" : "⭐⭐" });
+            } else {
+                history.push({ name: currentPlayerName, pre: "-", post: totalScore, stars: totalScore >= 85 ? "⭐⭐⭐" : "⭐⭐" });
+            }
+        }
+        
+        history.sort((a, b) => {
+            let valA = a.post !== "-" ? a.post : a.pre;
+            let valB = b.post !== "-" ? b.post : b.pre;
+            return valB - valA;
+        });
+        
+        localStorage.setItem('monsterScores', JSON.stringify(history));
+        document.getElementById('player-name').value = '';
+        
+        showScreen('leaderboard-screen');
+    }
+
+    function displayLeaderboard() {
+        const tbody = document.getElementById('leaderboard-tbody'); 
+        tbody.innerHTML = '';
+        const history = JSON.parse(localStorage.getItem('monsterScores')) || [];
+        
+        history.forEach((d, i) => { 
+            tbody.innerHTML += `
+                <tr>
+                    <td>${i+1}</td>
+                    <td style="text-align:left; padding-left:4vmin;">${d.name}</td>
+                    <td style="color:#2e86de;">${d.pre}</td>
+                    <td style="color:#ff6b81;">${d.post}</td>
+                    <td>${d.stars}</td>
+                    <td><button class="btn" style="padding: 0.5vmin 1.5vmin; font-size: 1.8vmin; background-color:#ee5253; box-shadow: 0 0.4vmin 0 #c0392b; margin:0; border-radius: 1vmin;" onclick="deleteScore(${i})">ลบ</button></td>
+                </tr>`; 
+        });
+    }
+
+    function deleteScore(index) {
+        if(confirm("คุณต้องการลบรายชื่อนักเรียนคนนี้ออกจากระบบใช่หรือไม่?")) {
+            let history = JSON.parse(localStorage.getItem('monsterScores')) || [];
+            history.splice(index, 1);
+            localStorage.setItem('monsterScores', JSON.stringify(history));
+            displayLeaderboard();
+        }
+    }
+</script>
+</body>
+</html>
